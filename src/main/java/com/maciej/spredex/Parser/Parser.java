@@ -7,7 +7,6 @@ import com.maciej.spredex.Cell.SingleCellRef;
 import com.maciej.spredex.Cell.RangeRef;
 import com.maciej.spredex.Cell.CellRef;
 import com.maciej.spredex.Cell.Cell;
-import com.maciej.spredex.Errors.ErrorReporter;
 import com.maciej.spredex.Parser.Expressions.Expression;
 import com.maciej.spredex.Parser.Lexer.Token;
 import com.maciej.spredex.Parser.Lexer.TokenType;
@@ -16,31 +15,21 @@ public class Parser {
 	private final List<Token> tokens;
 	private final List<CellRef> requires = new ArrayList<>();
 	private final Cell location;
-	private final ErrorReporter reporter;
 
 	// Always skip first '='
 	private int current = 1;
 
-	public Parser(List<Token> tokens, Cell location, ErrorReporter reporter) {
+	public Parser(List<Token> tokens, Cell location) {
 		this.tokens = tokens;
 		this.location = location;
-		this.reporter = reporter;
 	}
 
 	public ParseResult parse() {
 		Expression result;
-		try {
-			result = expression();
-		}
-		catch (ParseError error) {
-			reporter.report(error);
-			return null;
-		}
+		result = expression();
 
 		if (!isAtEnd()) {
-			reporter.report(
-					new ParseError("Expected exactly one expression after '='."));
-			return null;
+			throw new ParseError("Expected exactly one epxression after '='.");
 		}
 
 		return new ParseResult(result, requires);

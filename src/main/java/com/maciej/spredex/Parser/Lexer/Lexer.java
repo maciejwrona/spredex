@@ -3,32 +3,22 @@ package com.maciej.spredex.Parser.Lexer;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.maciej.spredex.Errors.ErrorReporter;
-
 public class Lexer {
 	private final String formula;
 	private final List<Token> tokens = new ArrayList<>();
-	private final ErrorReporter reporter;
 	
 	// Point to the start of the token being parsed and the next character to be parsed
 	private int start = 0;
 	private int current = 0;
 
-	public Lexer(String formula, ErrorReporter reporter) {
+	public Lexer(String formula) {
 		this.formula = formula;
-		this.reporter = reporter;
 	}
 
 	public List<Token> getTokens() {
-		try {
-			while (!isAtEnd()) {
-				start = current;
-				nextToken();
-			}
-		}
-		catch (TokenError error) {
-			reporter.report(error);
-			return null;
+		while (!isAtEnd()) {
+			start = current;
+			nextToken();
 		}
 
 		return tokens;

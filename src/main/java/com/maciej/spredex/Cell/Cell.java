@@ -7,6 +7,7 @@ public class Cell {
 	private Expression formulaAst = null;
 	private Object value = null;
 	private boolean updated = true;
+	private boolean error = false;
 
 	private final int row;
 	private final int column;
@@ -17,6 +18,7 @@ public class Cell {
 	public int row() { return row; }
 	public int column() { return column; }
 	public boolean updated() { return updated; }
+	public boolean error() { return error; }
 
 	public void setFormula(String formula) { 
 		this.formula = formula; 
@@ -31,6 +33,9 @@ public class Cell {
 		updated = true;
 	}
 	public void resetUpdate() { updated = false; }
+	public void setError(boolean error) {
+		this.error = error;
+	}
 
 	public Cell(int row, int column) {
 		this.row = row;

@@ -10,7 +10,6 @@ import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.JTextField;
 
-import com.maciej.spredex.Cell.CellLocation;
 import com.maciej.spredex.Sheet.MatrixSheet;
 import com.maciej.spredex.Sheet.Sheet;
 

@@ -9,7 +9,6 @@ import com.maciej.spredex.Cell.CellLocation;
 import com.maciej.spredex.Cell.CellRefVisitor;
 import com.maciej.spredex.Cell.RangeRef;
 import com.maciej.spredex.Cell.SingleCellRef;
-import com.maciej.spredex.Errors.ErrorReporter;
 import com.maciej.spredex.Errors.ErrorType;
 import com.maciej.spredex.Function.ExcelFunction;
 import com.maciej.spredex.Parser.Expressions.Expression;
@@ -25,27 +24,19 @@ import com.maciej.spredex.Sheet.Sheet;
 
 public class Interpreter implements ExpressionVisitor<Object>, CellRefVisitor<Object> {
 	private final Sheet sheet;
-	private final ErrorReporter reporter;
 
 	private final Map<String, ExcelFunction> functions;
 	
 	private Cell currentCell;
 
-	public Interpreter(Sheet sheet, Map<String, ExcelFunction> functions, ErrorReporter reporter) {
+	public Interpreter(Sheet sheet, Map<String, ExcelFunction> functions) {
 		this.sheet = sheet;
 		this.functions = functions;
-		this.reporter = reporter;
 	}
 
 	public Object interpret(Expression ast, Cell currentCell) {
 		this.currentCell = currentCell;
-		try {
-			return evaluate(ast);
-		}
-		catch (ExecutionError error) {
-			reporter.report(error);
-			return null;
-		}
+		return evaluate(ast);
 	}
 
 	public Object evaluate(Expression expression) {
