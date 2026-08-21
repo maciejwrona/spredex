@@ -15,7 +15,7 @@ public class Lexer {
 		this.formula = formula;
 	}
 
-	public List<Token> getTokens() {
+	public List<Token> tokenize() {
 		while (!isAtEnd()) {
 			start = current;
 			nextToken();
