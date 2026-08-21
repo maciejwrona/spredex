@@ -2,7 +2,7 @@ package com.maciej.spredex.Parser.Expressions;
 
 import java.util.List;
 
-import com.maciej.spredex.Cell.CellRef;
+import com.maciej.spredex.CellRef.CellRef;
 import com.maciej.spredex.Parser.Lexer.Token;
 
 public abstract class Expression {

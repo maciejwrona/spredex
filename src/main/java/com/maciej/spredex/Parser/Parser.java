@@ -3,10 +3,10 @@ package com.maciej.spredex.Parser;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.maciej.spredex.Cell.SingleCellRef;
-import com.maciej.spredex.Cell.RangeRef;
-import com.maciej.spredex.Cell.CellRef;
-import com.maciej.spredex.Cell.Cell;
+import com.maciej.spredex.CellRef.SingleCellRef;
+import com.maciej.spredex.CellRef.RangeRef;
+import com.maciej.spredex.CellRef.CellRef;
+import com.maciej.spredex.CellLoc;
 import com.maciej.spredex.Parser.Expressions.Expression;
 import com.maciej.spredex.Parser.Lexer.Token;
 import com.maciej.spredex.Parser.Lexer.TokenType;
@@ -14,12 +14,12 @@ import com.maciej.spredex.Parser.Lexer.TokenType;
 public class Parser {
 	private final List<Token> tokens;
 	private final List<CellRef> requires = new ArrayList<>();
-	private final Cell location;
+	private final CellLoc location;
 
 	// Always skip first '='
 	private int current = 1;
 
-	public Parser(List<Token> tokens, Cell location) {
+	public Parser(List<Token> tokens, CellLoc location) {
 		this.tokens = tokens;
 		this.location = location;
 	}

@@ -1,4 +1,4 @@
-package com.maciej.spredex.Cell;
+package com.maciej.spredex.Sheet;
 
 import com.maciej.spredex.Parser.Expressions.Expression;
 

@@ -1,4 +1,4 @@
-package com.maciej.spredex.Cell;
+package com.maciej.spredex.CellRef;
 
 public interface CellRefVisitor<T> {
 	T visitSingleCellRef(SingleCellRef ref);

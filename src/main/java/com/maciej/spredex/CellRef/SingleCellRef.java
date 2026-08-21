@@ -1,4 +1,4 @@
-package com.maciej.spredex.Cell;
+package com.maciej.spredex.CellRef;
 
 public class SingleCellRef extends CellRef {
 	private final int row;

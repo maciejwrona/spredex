@@ -4,20 +4,15 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-import com.maciej.spredex.Cell.Cell;
-import com.maciej.spredex.Cell.CellLocation;
-import com.maciej.spredex.Cell.CellRefVisitor;
-import com.maciej.spredex.Cell.RangeRef;
-import com.maciej.spredex.Cell.SingleCellRef;
+import com.maciej.spredex.CellLoc;
+import com.maciej.spredex.CellRef.CellRef;
+import com.maciej.spredex.CellRef.CellRefVisitor;
+import com.maciej.spredex.CellRef.RangeRef;
+import com.maciej.spredex.CellRef.SingleCellRef;
 import com.maciej.spredex.Errors.ErrorType;
 import com.maciej.spredex.Function.ExcelFunction;
 import com.maciej.spredex.Parser.Expressions.Expression;
-import com.maciej.spredex.Parser.Expressions.Expression.Binary;
-import com.maciej.spredex.Parser.Expressions.Expression.Call;
-import com.maciej.spredex.Parser.Expressions.Expression.Grouping;
-import com.maciej.spredex.Parser.Expressions.Expression.Literal;
-import com.maciej.spredex.Parser.Expressions.Expression.Reference;
-import com.maciej.spredex.Parser.Expressions.Expression.Unary;
+import com.maciej.spredex.Parser.Expressions.Expression.*;
 import com.maciej.spredex.Parser.Expressions.ExpressionVisitor;
 import com.maciej.spredex.Parser.Lexer.Token;
 import com.maciej.spredex.Sheet.Sheet;
@@ -27,15 +22,15 @@ public class Interpreter implements ExpressionVisitor<Object>, CellRefVisitor<Ob
 
 	private final Map<String, ExcelFunction> functions;
 	
-	private Cell currentCell;
+	private CellLoc location;
 
 	public Interpreter(Sheet sheet, Map<String, ExcelFunction> functions) {
 		this.sheet = sheet;
 		this.functions = functions;
 	}
 
-	public Object interpret(Expression ast, Cell currentCell) {
-		this.currentCell = currentCell;
+	public Object interpret(Expression ast, CellLoc location) {
+		this.location = location;
 		return evaluate(ast);
 	}
 
@@ -134,7 +129,14 @@ public class Interpreter implements ExpressionVisitor<Object>, CellRefVisitor<Ob
 
 	@Override
 	public Object visitSingleCellRef(SingleCellRef ref) {
-		return sheet.evaluate(new CellLocation(ref, currentCell));
+		CellLoc target = CellRef.refToLoc(ref, location);
+
+		if (sheet.isErrorAt(target)) {
+			throw new ExecutionError(ErrorType.TYPE, 
+					"Cell at " + target + " is not available.");
+		}
+
+		return sheet.valueAt(CellRef.refToLoc(ref, location));
 	}
 
 	@Override

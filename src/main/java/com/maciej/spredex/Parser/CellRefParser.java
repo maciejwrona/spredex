@@ -1,7 +1,7 @@
 package com.maciej.spredex.Parser;
 
-import com.maciej.spredex.Cell.SingleCellRef;
-import com.maciej.spredex.Cell.Cell;
+import com.maciej.spredex.CellLoc;
+import com.maciej.spredex.CellRef.SingleCellRef;
 
 public class CellRefParser {
 	private final String textRef;
@@ -12,7 +12,7 @@ public class CellRefParser {
 		this.textRef = textRef;
 	}
 
-	public SingleCellRef parse(Cell currentCell) {
+	public SingleCellRef parse(CellLoc currentCell) {
 		boolean lockedColumn = match('$');
 		int columnStart = current;
 		while (Character.isAlphabetic(peek())) {

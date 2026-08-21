@@ -1,7 +1,7 @@
 package com.maciej.spredex.Parser;
 
 import com.maciej.spredex.Parser.Expressions.Expression;
-import com.maciej.spredex.Cell.CellRef;
+import com.maciej.spredex.CellRef.CellRef;
 
 import java.util.List;
 
