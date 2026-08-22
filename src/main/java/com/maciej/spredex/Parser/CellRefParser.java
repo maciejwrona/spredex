@@ -15,14 +15,14 @@ public class CellRefParser {
 	public SingleCellRef parse(CellLoc currentCell) {
 		boolean lockedColumn = match('$');
 		int columnStart = current;
-		while (Character.isAlphabetic(peek())) {
+		while (Character.isLetter(peek())) {
 			nextChar();
 		}
 		int column = getColumnNumber(textRef.substring(columnStart, current));
 
 		boolean lockedRow = false;
 		// if no column provided, then the $ belongs to the row
-		if (column == 0 && lockedRow) {
+		if (column == 0 && lockedColumn) {
 			lockedColumn = false;
 			lockedRow = true;
 		}
@@ -41,8 +41,8 @@ public class CellRefParser {
 			throw new ParseError("Reference parsing error.");
 		}
 
-		return new SingleCellRef((lockedRow ? row : row - currentCell.row()), 
-								 (lockedColumn ? column : column - currentCell.column()), 
+		return new SingleCellRef(((lockedRow || row == 0) ? row : row - currentCell.row()), 
+								 ((lockedColumn || column == 0) ? column : column - currentCell.column()), 
 								  lockedRow, lockedColumn);
 	}
 

@@ -1,5 +1,6 @@
 package com.maciej.spredex.Parser.Expressions;
 
+import java.sql.Ref;
 import java.util.List;
 
 import com.maciej.spredex.CellRef.CellRef;
@@ -27,6 +28,17 @@ public abstract class Expression {
 		public <T> T accept(ExpressionVisitor<T> visitor) {
 			return visitor.visitBinaryExpression(this);
 		}
+
+		@Override
+		public boolean equals(Object other) {
+			if (other == null || getClass() != other.getClass()) return false;
+
+			Binary that = (Binary)other;
+
+			return (left.equals(that.left()) && 
+					operator.equals(that.operator()) && 
+					right.equals(that.right()));
+		}
 	}
 
 	public static class Unary extends Expression {
@@ -44,6 +56,16 @@ public abstract class Expression {
 		public <T> T accept(ExpressionVisitor<T> visitor) {
 			return visitor.visitUnaryExpression(this);
 		}
+
+		@Override
+		public boolean equals(Object other) {
+			if (other == null || getClass() != other.getClass()) return false;
+
+			Unary that = (Unary)other;
+
+			return (operator.equals(that.operator()) &&
+					right.equals(that.right()));
+		}
 	}
 
 	public static class Grouping extends Expression {
@@ -58,6 +80,15 @@ public abstract class Expression {
 		@Override
 		public <T> T accept(ExpressionVisitor<T> visitor) {
 			return visitor.visitGroupingExpression(this);
+		}
+
+		@Override
+		public boolean equals(Object other) {
+			if (other == null || getClass() != other.getClass()) return false;
+
+			Grouping that = (Grouping)other;
+
+			return (expression.equals(that.expression()));
 		}
 	}
 
@@ -74,6 +105,15 @@ public abstract class Expression {
 		public <T> T accept(ExpressionVisitor<T> visitor) {
 			return visitor.visitReferenceExpression(this);
 		}
+
+		@Override
+		public boolean equals(Object other) {
+			if (other == null || getClass() != other.getClass()) return false;
+
+			Reference that = (Reference)other;
+
+			return (reference.equals(that.reference()));
+		}
 	}
 
 	public static class Call extends Expression {
@@ -87,9 +127,20 @@ public abstract class Expression {
 			this.identifier = identifier;
 			this.arguments = arguments;
 		}
+
 		@Override
 		public <T> T accept(ExpressionVisitor<T> visitor) {
 			return visitor.visitCallExpression(this);
+		}
+
+		@Override
+		public boolean equals(Object other) {
+			if (other == null || getClass() != other.getClass()) return false;
+
+			Call that = (Call)other;
+
+			return (identifier.equals(that.identifier()) &&
+					arguments.equals(that.arguments));
 		}
 	}
 
@@ -107,5 +158,13 @@ public abstract class Expression {
 			return visitor.visitLiteralExpression(this);
 		}
 
+		@Override
+		public boolean equals(Object other) {
+			if (other == null || getClass() != other.getClass()) return false;
+
+			Literal that = (Literal)other;
+
+			return (literal.equals(that.literal()));
+		}
 	}
 }

@@ -135,7 +135,7 @@ public class Lexer {
 	}
 
 	private boolean isPartOfIdentifier(char c) {
-		return (Character.isDigit(c) || Character.isAlphabetic(c) || c == '$');
+		return (Character.isDigit(c) || Character.isLetter(c) || c == '$');
 	}
 
 	private boolean isAtEnd() {

@@ -16,4 +16,13 @@ public class RangeRef extends CellRef {
 	public <T> T accept(CellRefVisitor<T> visitor) {
 		return visitor.visitRangeRef(this);
 	}
+
+	@Override
+	public boolean equals(Object other) {
+		if (other == null || getClass() != other.getClass()) return false;
+
+		RangeRef that = (RangeRef)other;
+
+		return (left.equals(that.left) && right.equals(that.right));
+	}
 }

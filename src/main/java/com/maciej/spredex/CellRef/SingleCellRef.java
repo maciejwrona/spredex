@@ -22,4 +22,14 @@ public class SingleCellRef extends CellRef {
 	public <T> T accept(CellRefVisitor<T> visitor) {
 		return visitor.visitSingleCellRef(this);
 	}
+
+	@Override
+	public boolean equals(Object other) {
+		if (other == null || getClass() != other.getClass()) return false;
+
+		SingleCellRef that = (SingleCellRef)other;
+
+		return (row == that.row && column == that.column && 
+				lockedRow == that.lockedRow && lockedColumn == that.lockedColumn);
+	}
 }
