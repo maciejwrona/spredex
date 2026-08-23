@@ -1,5 +1,9 @@
 package com.maciej.spredex.CellRef;
 
+import com.maciej.spredex.CellCoordinates;
+import com.maciej.spredex.CellLoc;
+import com.maciej.spredex.CellRange;
+
 public class RangeRef extends CellRef {
 	private final SingleCellRef left;
 	private final SingleCellRef right;
@@ -24,5 +28,12 @@ public class RangeRef extends CellRef {
 		RangeRef that = (RangeRef)other;
 
 		return (left.equals(that.left) && right.equals(that.right));
+	}
+
+	@Override
+	public CellCoordinates toCoordinates(CellLoc currentLocation) {
+		return new CellRange(
+				SingleCellRef.refToLoc(left, currentLocation),
+				SingleCellRef.refToLoc(left, currentLocation));
 	}
 }

@@ -135,14 +135,14 @@ public class Interpreter implements ExpressionVisitor<Object>, CellRefVisitor<Ob
 
 	@Override
 	public Object visitSingleCellRef(SingleCellRef ref) {
-		CellLoc target = CellRef.refToLoc(ref, location);
+		CellLoc target = SingleCellRef.refToLoc(ref, location);
 
 		if (sheet.isErrorAt(target)) {
 			throw new ExecutionError(ErrorType.TYPE, 
 					"Cell at " + target + " is not available.");
 		}
 
-		return sheet.valueAt(CellRef.refToLoc(ref, location));
+		return sheet.valueAt(SingleCellRef.refToLoc(ref, location));
 	}
 
 	@Override

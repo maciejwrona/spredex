@@ -1,3 +1,3 @@
 package com.maciej.spredex;
 
-public record CellLoc(int row, int column) { }
+public record CellLoc(int row, int column) implements CellCoordinates {}

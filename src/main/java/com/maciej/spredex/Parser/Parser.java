@@ -16,8 +16,7 @@ public class Parser {
 	private final List<CellRef> requires = new ArrayList<>();
 	private final CellLoc location;
 
-	// Always skip first '='
-	private int current = 1;
+	private int current = 0;
 
 	public Parser(List<Token> tokens, CellLoc location) {
 		this.tokens = tokens;

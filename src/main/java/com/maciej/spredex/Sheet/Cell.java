@@ -1,5 +1,6 @@
 package com.maciej.spredex.Sheet;
 
+import com.maciej.spredex.CellLoc;
 import com.maciej.spredex.Parser.Expressions.Expression;
 
 public class Cell {
@@ -19,30 +20,33 @@ public class Cell {
 	public int column() { return column; }
 	public boolean updated() { return updated; }
 	public boolean error() { return error; }
+	public CellLoc location() { return new CellLoc(row, column); }
 
 	public void setFormula(String formula) { 
 		this.formula = formula; 
 		updated = false;
 	}
+
 	public void setAst(Expression ast) { 
 		this.formulaAst = ast; 
 		updated = false;
 	}
+
 	public void setValue(Object value) { 
 		this.value = value; 
 		updated = true;
 	}
+
 	public void resetUpdate() { updated = false; }
-	public void setError(boolean error) {
-		this.error = error;
-	}
+
+	public void setError(boolean error) { this.error = error; }
 
 	public Cell(int row, int column) {
 		this.row = row;
 		this.column = column;
 	}
 
-	public boolean hasFormula() {
+	public boolean hasExecutableFormula() {
 		return (formula.length() > 0 && formula.charAt(0) == '=');
 	}
 }	
