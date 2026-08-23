@@ -64,15 +64,21 @@ public class Interpreter implements ExpressionVisitor<Object>, CellRefVisitor<Ob
 			
 			// TODO: 
 			case EQUAL:
+				return equal(left, right);
 			case BANG_EQUAL:
+				return !equal(left, right);
 			case GREATER:
+				verifyNumberOperands(expression.operator(), left, right);
+				return (Double)left > (Double)right;
 			case LESS:
+				verifyNumberOperands(expression.operator(), left, right);
+				return (Double)left < (Double)right;
 			case GREATER_EQUAL:
+				verifyNumberOperands(expression.operator(), left, right);
+				return ((Double)left > (Double)right || doubleEqual((Double)left, (Double)right));
 			case LESS_EQUAL:
-
-			case COLON:
-				verifyReferenceOperands(expression.operator(), left, right);
-				return new RangeRef((SingleCellRef)left, (SingleCellRef)right);
+				verifyNumberOperands(expression.operator(), left, right);
+				return ((Double)left < (Double)right || doubleEqual((Double)left, (Double)right));
 		}
 		
 		return null;
@@ -114,7 +120,7 @@ public class Interpreter implements ExpressionVisitor<Object>, CellRefVisitor<Ob
 					"Expected " + function.arity() + " arguments for function " + expression.identifier().lexeme() + ".");
 		}
 		
-		return function.call(arguments, sheet, this);
+		return function.call(arguments, location, sheet);
 	}
 
 	@Override
@@ -144,20 +150,25 @@ public class Interpreter implements ExpressionVisitor<Object>, CellRefVisitor<Ob
 		return ref;
 	}
 
+	private boolean equal(Object left, Object right) {
+		if (left instanceof Double && right instanceof Double) {
+			return doubleEqual((Double)left, (Double)right);
+		}
+		else {
+			return left.equals(right);
+		}
+	}
+
+	private boolean doubleEqual(double left, double right) {
+		double epsilon = 1e-6;
+		return Math.abs(left - right) <= epsilon;
+	}
+
 	private void verifyNumberOperands(Token operator, Object... operands) {
 		for (Object operand : operands) {
 			if (!(operand instanceof Double)) {
 				throw new ExecutionError(ErrorType.TYPE, 
 						"Expected number operands for operator '" + operator.lexeme() + "'.");
-			}
-		}
-	}
-
-	private void verifyReferenceOperands(Token operator, Object... operands) {
-		for (Object operand : operands) {
-			if (!(operand instanceof SingleCellRef)) {
-				throw new ExecutionError(ErrorType.TYPE,
-						"Expected cell reference operands for operator '" + operator.lexeme() + "'.");
 			}
 		}
 	}
