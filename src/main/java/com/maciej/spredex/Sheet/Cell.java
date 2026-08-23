@@ -38,8 +38,4 @@ public class Cell {
 		this.row = row;
 		this.column = column;
 	}
-
-	public boolean hasExecutableFormula() {
-		return (formula.length() > 0 && formula.charAt(0) == '=');
-	}
 }	

@@ -30,6 +30,10 @@ public class Interpreter implements ExpressionVisitor<Object>, CellRefVisitor<Ob
 	}
 
 	public Object interpret(Expression ast, CellLoc location) {
+		if (ast == null) {
+			return null;
+		}
+
 		this.location = location;
 		return evaluate(ast);
 	}

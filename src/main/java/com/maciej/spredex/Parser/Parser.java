@@ -16,6 +16,7 @@ public class Parser {
 	private final List<CellRef> requires = new ArrayList<>();
 	private final CellLoc location;
 
+	// Skip leading '='
 	private int current = 1;
 
 	public Parser(List<Token> tokens, CellLoc location) {

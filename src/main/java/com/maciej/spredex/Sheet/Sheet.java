@@ -5,6 +5,7 @@ import com.maciej.spredex.CellLoc;
 import com.maciej.spredex.CellRef.CellRef;
 import com.maciej.spredex.Errors.ExcelError;
 import com.maciej.spredex.Interpreter.Interpreter;
+import com.maciej.spredex.Parser.NonFormulaParser;
 import com.maciej.spredex.Parser.ParseResult;
 import com.maciej.spredex.Parser.Parser;
 import com.maciej.spredex.Parser.Expressions.Expression;
@@ -50,24 +51,31 @@ public class Sheet extends AbstractTableModel {
 	private void updateAst(CellLoc target) {
 		Cell cell = cellAt(target);
 
-		if (!cell.hasExecutableFormula()) {
-			setAstAndRequired(target, null, new ArrayList<>());
-			return;
-		}
-
 		try {
-			Lexer lexer = new Lexer(cell.formula());
-			List<Token> tokens = lexer.tokenize();
-
-			Parser parser = new Parser(tokens, target);
-			ParseResult result = parser.parse();
-
+			ParseResult result = formulaToAst(cell.formula(), target);
 			setAstAndRequired(target, result.ast(), result.requires());
 		}
 		catch (ExcelError error) {
-			cell.setError(true);
+			setErrorAt(target, error);
 			setAstAndRequired(target, null, new ArrayList<>());
 		}
+	}
+
+	private ParseResult formulaToAst(String formula, CellLoc target) {
+		if (!isFormula(formula)) {
+			NonFormulaParser parser = new NonFormulaParser(formula);
+			return parser.parse();
+		}
+
+		Lexer lexer = new Lexer(formula);
+		List<Token> tokens = lexer.tokenize();
+
+		Parser parser = new Parser(tokens, target);
+		return parser.parse();
+	}
+
+	private boolean isFormula(String formula) {
+		return (formula.length() > 0 && formula.charAt(0) == '=');
 	}
 
 	private void setAstAndRequired(CellLoc target, Expression ast, List<CellRef> required) {
@@ -85,44 +93,25 @@ public class Sheet extends AbstractTableModel {
 		List<CellLoc> updateOrder = graph.getUpdateOrder(target);
 
 		for (CellLoc location : updateOrder) {
-			if (cellAt(location).ast() == null) {
-				updateFromFormula(location);
-			}
-			else {
-				updateFromAst(location);
-			}
+			updateValueOnlyAt(location);
 		}
 	}
 
-	// TODO: unify formula and non formula - on non formula just set Ast to a literal expression
-	private void updateFromFormula(CellLoc location) {
+	private void updateValueOnlyAt(CellLoc location) {
 		Cell cell = cellAt(location);
-		Object value;
 
-		try {
-			value = Double.parseDouble(cell.formula());
-		}
-		catch (NumberFormatException e) {
-			value = cell.formula();
+		if (cell.ast() == null) {
+			return;
 		}
 
-		cell.setValue(value);
-	}
-
-	private void updateFromAst(CellLoc location) {
-		Cell cell = cellAt(location);
-		Object value;
-
 		try {
-			value = interpreter.interpret(cell.ast(), location);
+			Object value = interpreter.interpret(cell.ast(), location);
+			cell.setValue(value);
 			cell.setError(false);
 		}
 		catch (ExcelError error) {
-			value = "#" + error.type().toString();
-			cell.setError(true);	
+			setErrorAt(location, error);
 		}
-
-		cell.setValue(value);	
 	}
 
 	public boolean isErrorAt(CellLoc location) {
@@ -135,6 +124,14 @@ public class Sheet extends AbstractTableModel {
 
 	private boolean isCellEmpty(CellLoc location) {
 		return cellAt(location) == null;
+	}
+
+	private void setErrorAt(CellLoc target, ExcelError error) {
+		Cell cell = cellAt(target);
+
+		String value = "#" + error.type().toString();
+		cell.setValue(value);
+		cell.setError(true);	
 	}
 
 	@Override
