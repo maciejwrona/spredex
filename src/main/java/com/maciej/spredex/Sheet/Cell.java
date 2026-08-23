@@ -7,7 +7,6 @@ public class Cell {
 	private String formula = "";
 	private Expression formulaAst = null;
 	private Object value = null;
-	private boolean updated = true;
 	private boolean error = false;
 
 	private final int row;
@@ -18,26 +17,20 @@ public class Cell {
 	public Object value() { return value; } 
 	public int row() { return row; }
 	public int column() { return column; }
-	public boolean updated() { return updated; }
 	public boolean error() { return error; }
 	public CellLoc location() { return new CellLoc(row, column); }
 
 	public void setFormula(String formula) { 
 		this.formula = formula; 
-		updated = false;
 	}
 
 	public void setAst(Expression ast) { 
 		this.formulaAst = ast; 
-		updated = false;
 	}
 
 	public void setValue(Object value) { 
 		this.value = value; 
-		updated = true;
 	}
-
-	public void resetUpdate() { updated = false; }
 
 	public void setError(boolean error) { this.error = error; }
 
