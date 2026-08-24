@@ -11,8 +11,10 @@ import com.maciej.spredex.Parser.Parser;
 import com.maciej.spredex.Parser.Expressions.Expression;
 import com.maciej.spredex.Parser.Lexer.Lexer;
 import com.maciej.spredex.Parser.Lexer.Token;
+import com.maciej.spredex.Sheet.DependencyGraph.DependencyGraph;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 
@@ -21,12 +23,13 @@ import javax.swing.table.AbstractTableModel;
 public class Sheet extends AbstractTableModel {
 	private final SparseMatrix cells;
 	private final Interpreter interpreter;
-	private DependencyGraph graph;
+	private final DependencyGraph graph;
 	private final int maxRows;
 	private final int maxColumns;
 
 	public Sheet(int maxRows, int maxColumns) {
-		cells = new SparseMatrix();
+		this.cells = new SparseMatrix();
+		this.graph = new DependencyGraph();
 		this.interpreter = new Interpreter(this, new HashMap<>());
 		this.maxRows = maxRows;
 		this.maxColumns = maxColumns;
@@ -41,6 +44,11 @@ public class Sheet extends AbstractTableModel {
 	}
 
 	public void setCell(CellLoc target, String formula) {
+		if (formula.length() == 0) {
+			cells.deleteCell(target.row(), target.column());
+			return;
+		}
+
 		cells.createCell(target.row(), target.column());
 
 		cellAt(target).setFormula(formula);
@@ -74,10 +82,6 @@ public class Sheet extends AbstractTableModel {
 		return parser.parse();
 	}
 
-	private boolean isFormula(String formula) {
-		return (formula.length() > 0 && formula.charAt(0) == '=');
-	}
-
 	private void setAstAndRequired(CellLoc target, Expression ast, List<CellRef> required) {
 		cellAt(target).setAst(ast);
 
@@ -90,7 +94,15 @@ public class Sheet extends AbstractTableModel {
 
 	// Updates the value at target, also updating every cell affected
 	private void updateValueRecursively(CellLoc target) {
-		List<CellLoc> updateOrder = graph.getUpdateOrder(target);
+		Collection<CellLoc> updateOrder;
+
+		try {
+			updateOrder = graph.getUpdateOrder(target);
+		}
+		catch (ExcelError error) {
+			setErrorAt(target, error);
+			return;
+		}
 
 		for (CellLoc location : updateOrder) {
 			updateValueOnlyAt(location);
@@ -134,6 +146,10 @@ public class Sheet extends AbstractTableModel {
 		cell.setError(true);	
 	}
 
+	private boolean isFormula(String formula) {
+		return (formula.length() > 0 && formula.charAt(0) == '=');
+	}
+
 	@Override
 	public int getRowCount() {
 		return maxRows;
@@ -153,5 +169,15 @@ public class Sheet extends AbstractTableModel {
 		}
 
 		return valueAt(location);
+	}
+
+	@Override
+	public void setValueAt(Object aValue, int rowIndex, int columnIndex) {
+		setCell(new CellLoc(rowIndex, columnIndex), aValue.toString());
+	}
+
+	@Override
+	public boolean isCellEditable(int rowIndex, int columnIndex) {
+		return (rowIndex >= 1 && columnIndex >= 1);
 	}
 }

@@ -146,7 +146,7 @@ public class Interpreter implements ExpressionVisitor<Object>, CellRefVisitor<Ob
 					"Cell at " + target + " is not available.");
 		}
 
-		return sheet.valueAt(SingleCellRef.refToLoc(ref, location));
+		return sheet.valueAt(target);
 	}
 
 	@Override

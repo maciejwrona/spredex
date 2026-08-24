@@ -23,6 +23,14 @@ public class SparseMatrix {
 			.put(row, new Cell(row, column));
 	}
 
+	public void deleteCell(int row, int column) {
+		if (!columns.containsKey(column)) {
+			return;
+		}
+
+		columns.get(column).remove(row);
+	}
+
 	public Collection<Cell> getCellsInColumn(int column) {
 		return columns
 			.getOrDefault(column, new HashMap<>())
