@@ -1,20 +1,15 @@
 package com.maciej.spredex.Sheet.DependencyGraph;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
-import java.util.LinkedList;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
 import com.maciej.spredex.CellCoordinates;
 import com.maciej.spredex.CellLoc;
 import com.maciej.spredex.CellRange;
-import com.maciej.spredex.Errors.ErrorType;
-import com.maciej.spredex.Errors.ExcelError;
 
 public class DependencyGraph {
 	private final Map<CellLoc, Set<CellLoc>> singleRequired = new HashMap<>();
@@ -23,7 +18,11 @@ public class DependencyGraph {
 	private final Map<CellLoc, Set<CellLoc>> singleDependent = new HashMap<>();
 
 	private final Map<CellRange, Set<CellLoc>> dependentOnRange = new HashMap<>();
-	private final CellRangeResolver rangeResolver = new DoubleTreeResolver();
+	private final CellRangeResolver rangeResolver;
+
+	public DependencyGraph(int maxRows) {
+		this.rangeResolver = new DoubleTreeResolver(maxRows);
+	}
 
 	public void updateRequired(CellLoc by, Collection<CellCoordinates> required) {
 		deletePreviousRequired(by);
@@ -81,8 +80,7 @@ public class DependencyGraph {
 
 	private void recursiveUpdateOrder(CellLoc start, LinkedHashSet<CellLoc> result) {
 		if (result.contains(start)) {
-			throw new ExcelError(
-					ErrorType.CYCLE, "Reference cycle detected at cell " + start + ".");
+			throw new CycleError("Reference cycle detected at cell " + start + ".");
 		}
 		result.add(start);
 

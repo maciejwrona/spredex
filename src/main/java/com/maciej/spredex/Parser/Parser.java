@@ -16,12 +16,17 @@ public class Parser {
 	private final List<CellRef> requires = new ArrayList<>();
 	private final CellLoc location;
 
+	private final int maxRow;
+	private final int maxColumn;
+
 	// Skip leading '='
 	private int current = 1;
 
-	public Parser(List<Token> tokens, CellLoc location) {
+	public Parser(List<Token> tokens, CellLoc location, int maxRow, int maxColumn) {
 		this.tokens = tokens;
 		this.location = location;
+		this.maxRow = maxRow;
+		this.maxColumn = maxColumn;
 	}
 
 	public ParseResult parse() {
@@ -172,7 +177,7 @@ public class Parser {
 	}
 
 	private SingleCellRef tokenToReference(Token token) {
-		CellRefParser parser = new CellRefParser(token.lexeme());
+		CellRefParser parser = new CellRefParser(token.lexeme(), maxRow, maxColumn);
 		SingleCellRef reference = parser.parse(location);
 
 		return reference;

@@ -29,7 +29,7 @@ public class Sheet extends AbstractTableModel {
 
 	public Sheet(int maxRows, int maxColumns) {
 		this.cells = new SparseMatrix();
-		this.graph = new DependencyGraph();
+		this.graph = new DependencyGraph(maxRows);
 		this.interpreter = new Interpreter(this, new HashMap<>());
 		this.maxRows = maxRows;
 		this.maxColumns = maxColumns;
@@ -78,7 +78,7 @@ public class Sheet extends AbstractTableModel {
 		Lexer lexer = new Lexer(formula);
 		List<Token> tokens = lexer.tokenize();
 
-		Parser parser = new Parser(tokens, target);
+		Parser parser = new Parser(tokens, target, maxRows, maxColumns);
 		return parser.parse();
 	}
 
@@ -87,7 +87,7 @@ public class Sheet extends AbstractTableModel {
 
 		List<CellCoordinates> newRequired = new ArrayList<>();
 		for (CellRef ref : required) {
-			newRequired.add(ref.toCoordinates(target));
+			newRequired.add(ref.toCoordinates(target, maxRows, maxColumns));
 		}
 		graph.updateRequired(target, newRequired);
 	}

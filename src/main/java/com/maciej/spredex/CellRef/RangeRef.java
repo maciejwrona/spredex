@@ -3,6 +3,7 @@ package com.maciej.spredex.CellRef;
 import com.maciej.spredex.CellCoordinates;
 import com.maciej.spredex.CellLoc;
 import com.maciej.spredex.CellRange;
+import com.maciej.spredex.Parser.ParseError;
 
 public class RangeRef extends CellRef {
 	private final SingleCellRef left;
@@ -14,6 +15,12 @@ public class RangeRef extends CellRef {
 	public RangeRef(SingleCellRef left, SingleCellRef right) {
 		this.left = left;
 		this.right = right;
+
+		// Is invalid if left has unbounded row and right not, same for column
+		if (((left.row() == 0) != (right.row() == 0)) || 
+			((left.column() == 0) != (right.row() == 0))) {
+			throw new ParseError("Invalid range cell reference.");
+		}
 	}
 
 	@Override
@@ -31,9 +38,18 @@ public class RangeRef extends CellRef {
 	}
 
 	@Override
-	public CellCoordinates toCoordinates(CellLoc currentLocation) {
-		return new CellRange(
-				SingleCellRef.refToLoc(left, currentLocation),
-				SingleCellRef.refToLoc(left, currentLocation));
+	public CellCoordinates toCoordinates(CellLoc currentLocation, int maxRow, int maxColumn) {
+		// Convert unbounded rows / columns to 0-max
+		CellLoc newLeft = SingleCellRef.refToLoc(left, currentLocation);
+		CellLoc newRight = SingleCellRef.refToLoc(right, currentLocation);
+
+		if (right.row() == 0) {
+			newRight = new CellLoc(maxRow, newRight.column());
+		}
+		else if (right.column() == 0) {
+			newRight = new CellLoc(newRight.row(), maxColumn);
+		}
+
+		return new CellRange(newLeft, newRight);
 	}
 }

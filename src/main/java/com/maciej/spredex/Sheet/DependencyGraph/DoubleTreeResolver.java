@@ -11,17 +11,13 @@ import com.maciej.spredex.CellRange;
 
 public class DoubleTreeResolver implements CellRangeResolver {
 	private final int maxRows;
-	private final int maxColumns;
-
-	private final Map<Integer, SegmentTree1D> columnTrees;
-	private final CellRangeSegmentTree mainTree;
 	private final Map<CellRange, AtomicInteger> refCounter = new HashMap<>();
 
-	public DoubleTreeResolver(int maxRows, int maxColumns) {
+	private final Map<Integer, SegmentTree1D> columnTrees = new HashMap<>();
+	private final CellRangeContainer mainTree = new CellRangeContainer();
+
+	public DoubleTreeResolver(int maxRows) {
 		this.maxRows = maxRows;
-		this.maxColumns = maxColumns;
-		columnTrees = new HashMap<>();
-		mainTree = new CellRangeSegmentTree(maxRows, maxColumns);
 	}
 
 	@Override

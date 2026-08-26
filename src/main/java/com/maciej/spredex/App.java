@@ -1,5 +1,7 @@
 package com.maciej.spredex;
 
+import com.maciej.spredex.Sheet.Sheet;
+
 /**
  * Hello world!
  */

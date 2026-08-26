@@ -5,11 +5,15 @@ import com.maciej.spredex.CellRef.SingleCellRef;
 
 public class CellRefParser {
 	private final String textRef;
+	private final int maxRow;
+	private final int maxColumn;
 
 	private int current = 0;
 
-	public CellRefParser(String textRef) {
+	public CellRefParser(String textRef, int maxRow, int maxColumn) {
 		this.textRef = textRef;
+		this.maxRow = maxRow;
+		this.maxColumn = maxColumn;
 	}
 
 	public SingleCellRef parse(CellLoc currentCell) {
@@ -37,7 +41,8 @@ public class CellRefParser {
 
 		// Invalid reference
 		if (!isAtEnd() ||
-			(lockedRow && row == 0)) {
+			(lockedRow && row == 0) ||
+			(row >= maxRow || column >= maxColumn)) {
 			throw new ParseError("Reference parsing error.");
 		}
 

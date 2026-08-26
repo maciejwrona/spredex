@@ -27,7 +27,7 @@ public class SingleCellRef extends CellRef {
 	}
 
 	@Override
-	public CellCoordinates toCoordinates(CellLoc currentLocation) {
+	public CellCoordinates toCoordinates(CellLoc currentLocation, int maxRow, int maxColumn) {
 		return refToLoc(this, currentLocation);
 	}
 
