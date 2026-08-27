@@ -11,6 +11,10 @@ import com.maciej.spredex.CellRange;
 public class CellRangeContainer {
 	private final Set<CellRange> ranges = new HashSet<>();
 
+	public int size() {
+		return ranges.size();
+	}
+
 	public void add(CellRange range) {
 		ranges.add(range);
 	}

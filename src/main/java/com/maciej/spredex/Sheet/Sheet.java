@@ -14,7 +14,6 @@ import com.maciej.spredex.Parser.Lexer.Token;
 import com.maciej.spredex.Sheet.DependencyGraph.DependencyGraph;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 
@@ -94,7 +93,7 @@ public class Sheet extends AbstractTableModel {
 
 	// Updates the value at target, also updating every cell affected
 	private void updateValueRecursively(CellLoc target) {
-		Collection<CellLoc> updateOrder;
+		List<CellLoc> updateOrder;
 
 		try {
 			updateOrder = graph.getUpdateOrder(target);

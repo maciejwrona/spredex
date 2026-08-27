@@ -16,24 +16,31 @@ public class SegmentTree1D {
 	private final int minValue;
 	private final int maxValue;
 	private final Map<Integer, Set<FlatRange>> tree = new HashMap<>();
+	private int size = 0;
 
 	public SegmentTree1D(int minValue, int maxValue) {
 		this.minValue = minValue;
 		this.maxValue = maxValue;
 	}
 
+	public int size() {
+		return size;
+	}
+
 	public void add(FlatRange range) {
 		updateRecursively(range, 1, minValue, maxValue, UpdateType.ADD);		
+		size++;
 	}
 
 	public void remove(FlatRange range) {
 		updateRecursively(range, 1, minValue, maxValue, UpdateType.REMOVE);
+		size--;
 	}
 
 	private void updateRecursively(FlatRange range, 
 			int node, int nodeStart, int nodeEnd, UpdateType updateType) {
 		
-		if (range.left() <= nodeStart && range.right() <= nodeEnd) {
+		if (range.left() <= nodeStart && range.right() >= nodeEnd) {
 			switch (updateType) {
 				case ADD: 
 					tree.computeIfAbsent(node, (k) -> new HashSet<>()).add(range);
@@ -48,7 +55,7 @@ public class SegmentTree1D {
 		if (range.left() <= mid) {
 			updateRecursively(range, 2 * node, nodeStart, mid, updateType);
 		}
-		else {
+		if (range.right() > mid) {
 			updateRecursively(range, 2 * node + 1, mid + 1, nodeEnd, updateType);
 		}
 	}

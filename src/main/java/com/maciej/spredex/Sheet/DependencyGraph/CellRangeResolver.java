@@ -9,4 +9,5 @@ public interface CellRangeResolver {
 	public void add(CellRange range);
 	public void deleteOccurance(CellRange range);
 	public List<CellRange> getRangesContainingCell(CellLoc cell);
+	public int size();
 }

@@ -21,6 +21,14 @@ public class SingleCellRef extends CellRef {
 		this.lockedColumn = lockedColumn;
 	}
 
+	public boolean hasUnboundedColumn() {
+		return (!lockedColumn && column == 0);
+	}
+
+	public boolean hasUnboundedRow() {
+		return (!lockedRow && row == 0);
+	}
+
 	@Override
 	public <T> T accept(CellRefVisitor<T> visitor) {
 		return visitor.visitSingleCellRef(this);

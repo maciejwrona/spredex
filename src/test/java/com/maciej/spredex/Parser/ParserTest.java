@@ -33,7 +33,7 @@ class ParserTest {
 		);
 		CellLoc currentLocation = new CellLoc(10, 10);
 
-		Parser parser = new Parser(tokens, currentLocation);
+		Parser parser = new Parser(tokens, currentLocation, 100000, 100000);
 		ParseResult result = parser.parse();
 
 		Expression expected = new Expression.Binary(
@@ -59,14 +59,14 @@ class ParserTest {
 			new Token(TokenType.COLON, ":", null),
 			new Token(TokenType.IDENTIFIER, "B$10", null),
 			new Token(TokenType.COMMA, ",", null),
-			new Token(TokenType.INTEGER, "1", 1.0),
+			new Token(TokenType.INTEGER, "B", 1.0),
 			new Token(TokenType.COLON, ":", null),
 			new Token(TokenType.IDENTIFIER, "C", null),
 			new Token(TokenType.RIGHT_PAREN, ")", null)
 		);
 		CellLoc currentLocation = new CellLoc(0, 0);
 
-		Parser parser = new Parser(tokens, currentLocation);
+		Parser parser = new Parser(tokens, currentLocation, 100000, 100000);
 		ParseResult result = parser.parse();
 
 		Expression expected = new Expression.Call(
@@ -80,7 +80,7 @@ class ParserTest {
 				),
 				new Expression.Reference(
 					new RangeRef(
-						new SingleCellRef(1, 0, false, false),
+						new SingleCellRef(0, 2, false, false),
 						new SingleCellRef(0, 3, false, false)
 					)
 				)

@@ -20,6 +20,17 @@ public class DoubleTreeResolver implements CellRangeResolver {
 		this.maxRows = maxRows;
 	}
 
+	public int size() {
+		int result = 0;
+		for (SegmentTree1D column : columnTrees.values()) {
+			result += column.size();
+		}
+
+		result += mainTree.size();
+
+		return result;
+	}
+
 	@Override
 	public void add(CellRange range) {
 		if (

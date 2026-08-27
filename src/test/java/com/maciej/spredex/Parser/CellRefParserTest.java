@@ -23,7 +23,7 @@ class CellRefParserTest {
 	@DisplayName("Should correctly parse standard single references")
 	void testStandardReference(String textRef, String column, String row, 
 			  								   String lockedColumn, String lockedRow) {
-		CellRefParser parser = new CellRefParser(textRef);
+		CellRefParser parser = new CellRefParser(textRef, 10000, 10000);
 		CellLoc currentLocation = new CellLoc(10, 10);
 
 		SingleCellRef ref = parser.parse(currentLocation);
@@ -42,7 +42,7 @@ class CellRefParserTest {
 	@DisplayName("Should correctly parse now row/column references")
 	void testMissingRowOrColumn(String textRef, String column, String row, 
 			  								   String lockedColumn, String lockedRow) {
-		CellRefParser parser = new CellRefParser(textRef);
+		CellRefParser parser = new CellRefParser(textRef, 100000, 100000);
 		CellLoc currentLocation = new CellLoc(10, 10);
 
 		SingleCellRef ref = parser.parse(currentLocation);
@@ -57,7 +57,7 @@ class CellRefParserTest {
 	@ValueSource(strings = { "$$A32", " $32", "$$32", "$$AB", "$AB$", "!A10" })
 	@DisplayName("Should correctly identify invalid references")
 	void testInvalidReference(String textRef) {
-		CellRefParser parser = new CellRefParser(textRef);
+		CellRefParser parser = new CellRefParser(textRef, 100000, 100000);
 		CellLoc currentLocation = new CellLoc(10, 10);
 
 		assertThatThrownBy(() -> parser.parse(currentLocation))

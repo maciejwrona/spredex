@@ -1,9 +1,11 @@
 package com.maciej.spredex.Sheet.DependencyGraph;
 
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -29,15 +31,6 @@ public class DependencyGraph {
 		setNewRequired(by, required);
 		updateNewDependents(by);
 	}
-
-	public Collection<CellLoc> getUpdateOrder(CellLoc start) {
-		LinkedHashSet<CellLoc> result = new LinkedHashSet<>();
-
-		recursiveUpdateOrder(start, result);
-
-		return result;
-	}
-
 
 	private void deletePreviousRequired(CellLoc by) {
 		for (CellLoc cell : singleRequired.getOrDefault(by, new HashSet<>())) {
@@ -78,20 +71,57 @@ public class DependencyGraph {
 		}
 	}
 
-	private void recursiveUpdateOrder(CellLoc start, LinkedHashSet<CellLoc> result) {
-		if (result.contains(start)) {
+	private enum VisitedState {
+		IN_CURRENT_SUBGRAPH,
+		IN_WHOLE_GRAPH,
+	}
+
+	public List<CellLoc> getUpdateOrder(CellLoc start) {
+		Map<CellLoc, VisitedState> visited = new HashMap<>();
+		List<CellLoc> result = new ArrayList<>();
+
+		recursiveUpdateOrder(start, visited, result);
+
+
+		Collections.reverse(result);
+		return result;
+	}
+
+	private void recursiveUpdateOrder(CellLoc start, Map<CellLoc, VisitedState> visited, 
+									  List<CellLoc> result) {
+		if (visited.get(start) == VisitedState.IN_CURRENT_SUBGRAPH) {
 			throw new CycleError("Reference cycle detected at cell " + start + ".");
 		}
-		result.add(start);
+		else if (visited.get(start) == VisitedState.IN_WHOLE_GRAPH) {
+			return;
+		}
+
+		visited.put(start, VisitedState.IN_CURRENT_SUBGRAPH);
 
 		for (CellLoc cell : singleDependent.getOrDefault(start, new HashSet<>())) {
-			recursiveUpdateOrder(cell, result);	
+			recursiveUpdateOrder(cell, visited, result);	
 		}
 
 		for (CellRange range : rangeResolver.getRangesContainingCell(start)) {
 			for (CellLoc cell : dependentOnRange.get(range)) {
-				recursiveUpdateOrder(cell, result);
+				recursiveUpdateOrder(cell, visited, result);
 			}
 		}
+
+		result.add(start);
+		visited.put(start, VisitedState.IN_WHOLE_GRAPH);
+	}
+
+	Set<CellLoc> getSingleRequired(CellLoc cell) {
+		return singleRequired.getOrDefault(cell, new HashSet<>());
+	}
+	Set<CellRange> getRangesRequired(CellLoc cell) {
+		return rangesRequired.getOrDefault(cell, new HashSet<>());
+	}
+	Set<CellLoc> getSingleDependent(CellLoc cell) {
+		return singleDependent.getOrDefault(cell, new HashSet<>());
+	}
+	Set<CellLoc> getDependentOnRange(CellRange range) {
+		return dependentOnRange.getOrDefault(range, new HashSet<>());
 	}
 }

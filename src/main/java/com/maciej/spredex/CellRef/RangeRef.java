@@ -17,8 +17,8 @@ public class RangeRef extends CellRef {
 		this.right = right;
 
 		// Is invalid if left has unbounded row and right not, same for column
-		if (((left.row() == 0) != (right.row() == 0)) || 
-			((left.column() == 0) != (right.row() == 0))) {
+		if ((left.hasUnboundedColumn() != right.hasUnboundedColumn()) ||
+			(left.hasUnboundedRow() != right.hasUnboundedRow())) {
 			throw new ParseError("Invalid range cell reference.");
 		}
 	}
