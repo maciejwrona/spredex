@@ -1,6 +1,7 @@
 package com.maciej.spredex.Sheet;
 
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -9,7 +10,7 @@ public class SparseMatrix {
 
 	public Cell get(int row, int column) {
 		return columns
-			.getOrDefault(column, new HashMap<>())
+			.getOrDefault(column, Collections.emptyMap())
 			.getOrDefault(row, null);
 	}
 
@@ -33,7 +34,7 @@ public class SparseMatrix {
 
 	public Collection<Cell> getCellsInColumn(int column) {
 		return columns
-			.getOrDefault(column, new HashMap<>())
+			.getOrDefault(column, Collections.emptyMap())
 			.values();
 	}
 }

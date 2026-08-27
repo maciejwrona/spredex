@@ -33,10 +33,10 @@ public class DependencyGraph {
 	}
 
 	private void deletePreviousRequired(CellLoc by) {
-		for (CellLoc cell : singleRequired.getOrDefault(by, new HashSet<>())) {
+		for (CellLoc cell : singleRequired.getOrDefault(by, Collections.emptySet())) {
 			singleDependent.get(cell).remove(by);
 		}
-		for (CellRange range : rangesRequired.getOrDefault(by, new HashSet<>())) {
+		for (CellRange range : rangesRequired.getOrDefault(by, Collections.emptySet())) {
 			dependentOnRange.get(range).remove(by);
 			rangeResolver.deleteOccurance(range);
 		}
@@ -98,7 +98,7 @@ public class DependencyGraph {
 
 		visited.put(start, VisitedState.IN_CURRENT_SUBGRAPH);
 
-		for (CellLoc cell : singleDependent.getOrDefault(start, new HashSet<>())) {
+		for (CellLoc cell : singleDependent.getOrDefault(start, Collections.emptySet())) {
 			recursiveUpdateOrder(cell, visited, result);	
 		}
 
@@ -113,15 +113,15 @@ public class DependencyGraph {
 	}
 
 	Set<CellLoc> getSingleRequired(CellLoc cell) {
-		return singleRequired.getOrDefault(cell, new HashSet<>());
+		return singleRequired.getOrDefault(cell, Collections.emptySet());
 	}
 	Set<CellRange> getRangesRequired(CellLoc cell) {
-		return rangesRequired.getOrDefault(cell, new HashSet<>());
+		return rangesRequired.getOrDefault(cell, Collections.emptySet());
 	}
 	Set<CellLoc> getSingleDependent(CellLoc cell) {
-		return singleDependent.getOrDefault(cell, new HashSet<>());
+		return singleDependent.getOrDefault(cell, Collections.emptySet());
 	}
 	Set<CellLoc> getDependentOnRange(CellRange range) {
-		return dependentOnRange.getOrDefault(range, new HashSet<>());
+		return dependentOnRange.getOrDefault(range, Collections.emptySet());
 	}
 }
