@@ -126,10 +126,8 @@ class DependencyGraphTest {
 		void testCycle() {
 			graph.updateRequired(
 					new CellLoc(1, 1), List.of(new CellLoc(2, 2), new CellLoc(3, 3)));
-			graph.updateRequired(
-					new CellLoc(3, 3), List.of(new CellRange(new CellLoc(1, 1), new CellLoc(2, 2))));
-
-			assertThatThrownBy(() -> graph.getUpdateOrder(new CellLoc(1, 1)))
+			assertThatThrownBy(() -> graph.updateRequired(
+					new CellLoc(3, 3), List.of(new CellRange(new CellLoc(1, 1), new CellLoc(2, 2)))))
 				.isInstanceOf(CellError.class);
 		}
 	}

@@ -87,10 +87,12 @@ class SheetTest {
 			sheet.setCell(new CellLoc(3, 3), "=1 +");
 			sheet.setCell(new CellLoc(4, 4), "1");
 			sheet.setCell(new CellLoc(5, 5), "=D4 + 1");
+			sheet.setCell(new CellLoc(6, 6), "=A1:B2");
 
 			assertTrue(sheet.isErrorAt(new CellLoc(2, 2)));
 			assertTrue(sheet.isErrorAt(new CellLoc(3, 3)));
 			assertFalse(sheet.isErrorAt(new CellLoc(5, 5)));
+			assertEquals("#TYPE", sheet.valueAt(new CellLoc(6, 6)));
 
 			sheet.setCell(new CellLoc(4, 4), "hello");
 

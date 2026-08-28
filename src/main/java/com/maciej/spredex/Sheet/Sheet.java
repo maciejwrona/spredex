@@ -59,6 +59,8 @@ public class Sheet extends AbstractTableModel {
 	private void updateAst(CellLoc target) {
 		Cell cell = cellAt(target);
 
+		// TODO: seperate catching parsing errors from cycles
+		// Catches parsing and cycle errors
 		try {
 			ParseResult result = formulaToAst(cell.formula(), target);
 			setAstAndRequired(target, result.ast(), result.requires());
@@ -97,15 +99,7 @@ public class Sheet extends AbstractTableModel {
 
 	// Updates the value at target, also updating every cell affected
 	private void updateValueRecursively(CellLoc target) {
-		List<CellLoc> updateOrder;
-
-		try {
-			updateOrder = graph.getUpdateOrder(target);
-		}
-		catch (CellError error) {
-			setErrorAt(target, error);
-			return;
-		}
+		List<CellLoc> updateOrder = graph.getUpdateOrder(target);
 
 		for (CellLoc location : updateOrder) {
 			updateValueOnlyAt(location);
@@ -119,6 +113,7 @@ public class Sheet extends AbstractTableModel {
 			return;
 		}
 
+
 		try {
 			Object value = interpreter.interpret(cell.ast(), location);
 			cell.setValue(value);
@@ -126,7 +121,9 @@ public class Sheet extends AbstractTableModel {
 		}
 		catch (CellError error) {
 			setErrorAt(location, error);
+			return;
 		}
+
 	}
 
 	public boolean isErrorAt(CellLoc location) {

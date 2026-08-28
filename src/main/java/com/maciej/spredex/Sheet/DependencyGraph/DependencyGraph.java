@@ -32,6 +32,7 @@ public class DependencyGraph {
 		deletePreviousRequired(by);
 		setNewRequired(by, required);
 		updateNewDependents(by);
+		verifyNoCycles(by, new HashMap<>());
 	}
 
 	private void deletePreviousRequired(CellLoc by) {
@@ -78,21 +79,9 @@ public class DependencyGraph {
 		IN_WHOLE_GRAPH,
 	}
 
-	public List<CellLoc> getUpdateOrder(CellLoc start) {
-		Map<CellLoc, VisitedState> visited = new HashMap<>();
-		List<CellLoc> result = new ArrayList<>();
-
-		recursiveUpdateOrder(start, visited, result);
-
-
-		Collections.reverse(result);
-		return result;
-	}
-
-	private void recursiveUpdateOrder(CellLoc start, Map<CellLoc, VisitedState> visited, 
-									  List<CellLoc> result) {
+	private void verifyNoCycles(CellLoc start, Map<CellLoc, VisitedState> visited) {
 		if (visited.get(start) == VisitedState.IN_CURRENT_SUBGRAPH) {
-			throw new CellError(ErrorType.CYCLE, 
+			throw new CellError(ErrorType.CYCLE,
 					"Reference cycle detected at cell " + start + ".");
 		}
 		else if (visited.get(start) == VisitedState.IN_WHOLE_GRAPH) {
@@ -100,6 +89,38 @@ public class DependencyGraph {
 		}
 
 		visited.put(start, VisitedState.IN_CURRENT_SUBGRAPH);
+
+		for (CellLoc cell : singleDependent.getOrDefault(start, Collections.emptySet())) {
+			verifyNoCycles(cell, visited);	
+		}
+
+		for (CellRange range : rangeResolver.getRangesContainingCell(start)) {
+			for (CellLoc cell : dependentOnRange.get(range)) {
+				verifyNoCycles(cell, visited);
+			}
+		}
+
+		visited.put(start, VisitedState.IN_WHOLE_GRAPH);
+	}
+
+	// Returns the topological sort of the subgraph connected to start
+	// If the graph is not a dag then returns the cells connected to start
+	public List<CellLoc> getUpdateOrder(CellLoc start) {
+		Set<CellLoc> visited = new HashSet<>();
+		List<CellLoc> result = new ArrayList<>();
+
+		recursiveUpdateOrder(start, visited, result);
+		Collections.reverse(result);
+
+		return result;
+	}
+
+	private void recursiveUpdateOrder(CellLoc start, Set<CellLoc> visited, List<CellLoc> result) {
+		if (visited.contains(start)) {
+			return;
+		}
+
+		visited.add(start);
 
 		for (CellLoc cell : singleDependent.getOrDefault(start, Collections.emptySet())) {
 			recursiveUpdateOrder(cell, visited, result);	
@@ -112,7 +133,6 @@ public class DependencyGraph {
 		}
 
 		result.add(start);
-		visited.put(start, VisitedState.IN_WHOLE_GRAPH);
 	}
 
 	Set<CellLoc> getSingleRequired(CellLoc cell) {

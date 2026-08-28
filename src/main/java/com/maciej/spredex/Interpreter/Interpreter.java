@@ -35,7 +35,14 @@ public class Interpreter implements ExpressionVisitor<Object>, CellRefVisitor<Ob
 		}
 
 		this.location = location;
-		return evaluate(ast);
+		Object result = evaluate(ast);
+
+		if (result instanceof RangeRef) {
+			throw new CellError(ErrorType.TYPE, 
+					"Invalid value of type RangeCellReferences.");
+		}
+
+		return result;
 	}
 
 	public Object evaluate(Expression expression) {
