@@ -5,7 +5,6 @@ import java.util.List;
 import java.util.Map;
 
 import com.maciej.spredex.CellLoc;
-import com.maciej.spredex.CellRef.CellRef;
 import com.maciej.spredex.CellRef.CellRefVisitor;
 import com.maciej.spredex.CellRef.RangeRef;
 import com.maciej.spredex.CellRef.SingleCellRef;

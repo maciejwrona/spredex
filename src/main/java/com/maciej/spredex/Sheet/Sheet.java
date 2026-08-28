@@ -126,7 +126,7 @@ public class Sheet extends AbstractTableModel {
 	}
 
 	public boolean isErrorAt(CellLoc location) {
-		return (!isCellEmpty(location) || cellAt(location).error());
+		return (isCellEmpty(location) || cellAt(location).error());
 	}
 
 	private Cell cellAt(CellLoc location) {
