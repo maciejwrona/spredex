@@ -4,11 +4,12 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import com.maciej.spredex.CellError;
 import com.maciej.spredex.CellLoc;
 import com.maciej.spredex.CellRef.CellRefVisitor;
 import com.maciej.spredex.CellRef.RangeRef;
 import com.maciej.spredex.CellRef.SingleCellRef;
-import com.maciej.spredex.Errors.ErrorType;
+import com.maciej.spredex.ErrorType;
 import com.maciej.spredex.Function.ExcelFunction;
 import com.maciej.spredex.Parser.Expressions.Expression;
 import com.maciej.spredex.Parser.Expressions.Expression.*;
@@ -109,7 +110,7 @@ public class Interpreter implements ExpressionVisitor<Object>, CellRefVisitor<Ob
 	public Object visitCallExpression(Call expression) {
 		ExcelFunction function = functions.get(expression.identifier().lexeme());
 		if (function == null) {
-			throw new ExecutionError(ErrorType.IDENTIFIER, 
+			throw new CellError(ErrorType.IDENTIFIER, 
 					expression.identifier().lexeme() + " is not a function.");
 		}
 
@@ -119,7 +120,7 @@ public class Interpreter implements ExpressionVisitor<Object>, CellRefVisitor<Ob
 		}
 
 		if (arguments.size() != function.arity()) {
-			throw new ExecutionError(ErrorType.IDENTIFIER, 
+			throw new CellError(ErrorType.IDENTIFIER, 
 					"Expected " + function.arity() + " arguments for function " + expression.identifier().lexeme() + ".");
 		}
 		
@@ -141,7 +142,7 @@ public class Interpreter implements ExpressionVisitor<Object>, CellRefVisitor<Ob
 		CellLoc target = SingleCellRef.refToLoc(ref, location);
 
 		if (sheet.isErrorAt(target)) {
-			throw new ExecutionError(ErrorType.TYPE, 
+			throw new CellError(ErrorType.TYPE, 
 					"Cell at " + target + " is not available.");
 		}
 
@@ -170,7 +171,7 @@ public class Interpreter implements ExpressionVisitor<Object>, CellRefVisitor<Ob
 	private void verifyNumberOperands(Token operator, Object... operands) {
 		for (Object operand : operands) {
 			if (!(operand instanceof Double)) {
-				throw new ExecutionError(ErrorType.TYPE, 
+				throw new CellError(ErrorType.TYPE, 
 						"Expected number operands for operator '" + operator.lexeme() + "'.");
 			}
 		}

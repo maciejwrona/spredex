@@ -7,7 +7,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 
-import com.maciej.spredex.Errors.ExcelError;
+import com.maciej.spredex.CellError;
 
 import static org.assertj.core.api.Assertions.*;
 
@@ -57,6 +57,6 @@ class LexerTest {
 		Lexer lexer = new Lexer(formula);
 
 		assertThatThrownBy(() -> lexer.tokenize())
-			.isInstanceOf(ExcelError.class);
+			.isInstanceOf(CellError.class);
 	}
 }

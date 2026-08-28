@@ -1,9 +1,10 @@
 package com.maciej.spredex.CellRef;
 
 import com.maciej.spredex.CellCoordinates;
+import com.maciej.spredex.CellError;
 import com.maciej.spredex.CellLoc;
 import com.maciej.spredex.CellRange;
-import com.maciej.spredex.Parser.ParseError;
+import com.maciej.spredex.ErrorType;
 
 public class RangeRef extends CellRef {
 	private final SingleCellRef left;
@@ -19,7 +20,7 @@ public class RangeRef extends CellRef {
 		// Is invalid if left has unbounded row and right not, same for column
 		if ((left.hasUnboundedColumn() != right.hasUnboundedColumn()) ||
 			(left.hasUnboundedRow() != right.hasUnboundedRow())) {
-			throw new ParseError("Invalid range cell reference.");
+			throw new CellError(ErrorType.PARSE, "Invalid range cell reference.");
 		}
 	}
 

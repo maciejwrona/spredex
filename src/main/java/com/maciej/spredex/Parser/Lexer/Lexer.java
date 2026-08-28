@@ -3,6 +3,9 @@ package com.maciej.spredex.Parser.Lexer;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.maciej.spredex.CellError;
+import com.maciej.spredex.ErrorType;
+
 public class Lexer {
 	private final String formula;
 	private final List<Token> tokens = new ArrayList<>();
@@ -87,7 +90,7 @@ public class Lexer {
 					break;
 				}
 				else {
-					throw new TokenError("Unrecognized token at " + start + ".");
+					throw tokenError("Unrecognized token at " + start + ".");
 				}
 		}
 	}
@@ -96,7 +99,7 @@ public class Lexer {
 		while (peek() == '"') nextChar(); 
 
 		if (isAtEnd()) {
-			throw new TokenError("Expected closing '\"'.");
+			throw tokenError("Expected closing '\"'.");
 		}
 		
 		// Consume the ". Add the string without surrouding "
@@ -111,7 +114,7 @@ public class Lexer {
 		if (match('.')) {
 			// There must be at least one digit after the .
 			if (!Character.isDigit(peek())) {
-				throw new TokenError("Expected at least one digit after '.'");
+				throw tokenError("Expected at least one digit after '.'");
 			}
 
 			while (Character.isDigit(peek())) nextChar();
@@ -132,6 +135,10 @@ public class Lexer {
 			default:
 				addToken(TokenType.IDENTIFIER);
 		}
+	}
+
+	private CellError tokenError(String message) {
+		return new CellError(ErrorType.TOKEN, message);
 	}
 
 	private boolean isPartOfIdentifier(char c) {

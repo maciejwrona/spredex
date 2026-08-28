@@ -6,7 +6,9 @@ import java.util.List;
 import com.maciej.spredex.CellRef.SingleCellRef;
 import com.maciej.spredex.CellRef.RangeRef;
 import com.maciej.spredex.CellRef.CellRef;
+import com.maciej.spredex.CellError;
 import com.maciej.spredex.CellLoc;
+import com.maciej.spredex.ErrorType;
 import com.maciej.spredex.Parser.Expressions.Expression;
 import com.maciej.spredex.Parser.Lexer.Token;
 import com.maciej.spredex.Parser.Lexer.TokenType;
@@ -35,7 +37,7 @@ public class FormulaParser implements Parser {
 		result = expression();
 
 		if (!isAtEnd()) {
-			throw new ParseError("Expected exactly one epxression after '='.");
+			throw parseError("Expected exactly one epxression after '='.");
 		}
 
 		return new ParseResult(result, requires);
@@ -149,7 +151,7 @@ public class FormulaParser implements Parser {
 			return handleIdentifer();
 		}
 
-		throw new ParseError("Expected expression.");
+		throw parseError("Expected expression.");
 	}
 
 	private Expression handleIdentifer() {
@@ -200,7 +202,11 @@ public class FormulaParser implements Parser {
 	private void consume(TokenType type, String errorMessage) {
 		if (match(type)) return;
 
-		throw new ParseError(errorMessage);
+		throw parseError(errorMessage);
+	}
+
+	private CellError parseError(String message) {
+		return new CellError(ErrorType.PARSE, message);
 	}
 
 	private boolean isAtEnd() {

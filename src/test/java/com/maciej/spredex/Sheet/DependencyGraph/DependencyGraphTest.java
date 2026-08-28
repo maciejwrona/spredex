@@ -16,6 +16,7 @@ import org.junit.jupiter.api.Test;
 import com.maciej.spredex.CellLoc;
 import com.maciej.spredex.CellRange;
 import com.maciej.spredex.CellCoordinates;
+import com.maciej.spredex.CellError;
 
 class DependencyGraphTest {
 
@@ -129,7 +130,7 @@ class DependencyGraphTest {
 					new CellLoc(3, 3), List.of(new CellRange(new CellLoc(1, 1), new CellLoc(2, 2))));
 
 			assertThatThrownBy(() -> graph.getUpdateOrder(new CellLoc(1, 1)))
-				.isInstanceOf(CycleError.class);
+				.isInstanceOf(CellError.class);
 		}
 	}
 }

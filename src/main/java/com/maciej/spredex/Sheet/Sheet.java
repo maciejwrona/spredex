@@ -1,9 +1,9 @@
 package com.maciej.spredex.Sheet;
 
 import com.maciej.spredex.CellCoordinates;
+import com.maciej.spredex.CellError;
 import com.maciej.spredex.CellLoc;
 import com.maciej.spredex.CellRef.CellRef;
-import com.maciej.spredex.Errors.ExcelError;
 import com.maciej.spredex.Interpreter.Interpreter;
 import com.maciej.spredex.Parser.FormulaParser;
 import com.maciej.spredex.Parser.NonFormulaParser;
@@ -63,7 +63,7 @@ public class Sheet extends AbstractTableModel {
 			ParseResult result = formulaToAst(cell.formula(), target);
 			setAstAndRequired(target, result.ast(), result.requires());
 		}
-		catch (ExcelError error) {
+		catch (CellError error) {
 			setErrorAt(target, error);
 			setAstAndRequired(target, null, new ArrayList<>());
 		}
@@ -102,7 +102,7 @@ public class Sheet extends AbstractTableModel {
 		try {
 			updateOrder = graph.getUpdateOrder(target);
 		}
-		catch (ExcelError error) {
+		catch (CellError error) {
 			setErrorAt(target, error);
 			return;
 		}
@@ -124,7 +124,7 @@ public class Sheet extends AbstractTableModel {
 			cell.setValue(value);
 			cell.setError(false);
 		}
-		catch (ExcelError error) {
+		catch (CellError error) {
 			setErrorAt(location, error);
 		}
 	}
@@ -141,10 +141,10 @@ public class Sheet extends AbstractTableModel {
 		return cellAt(location) == null;
 	}
 
-	private void setErrorAt(CellLoc target, ExcelError error) {
+	private void setErrorAt(CellLoc target, CellError error) {
 		Cell cell = cellAt(target);
 
-		String value = "#" + error.type().toString();
+		String value = "#" + error.getType().toString();
 		cell.setValue(value);
 		cell.setError(true);	
 	}

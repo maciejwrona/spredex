@@ -1,7 +1,9 @@
 package com.maciej.spredex.Parser;
 
+import com.maciej.spredex.CellError;
 import com.maciej.spredex.CellLoc;
 import com.maciej.spredex.CellRef.SingleCellRef;
+import com.maciej.spredex.Sheet.Cell;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -61,6 +63,6 @@ class CellRefParserTest {
 		CellLoc currentLocation = new CellLoc(10, 10);
 
 		assertThatThrownBy(() -> parser.parse(currentLocation))
-			.isInstanceOf(ParseError.class);
+			.isInstanceOf(CellError.class);
 	}
 }

@@ -10,8 +10,10 @@ import java.util.Map;
 import java.util.Set;
 
 import com.maciej.spredex.CellCoordinates;
+import com.maciej.spredex.CellError;
 import com.maciej.spredex.CellLoc;
 import com.maciej.spredex.CellRange;
+import com.maciej.spredex.ErrorType;
 
 public class DependencyGraph {
 	private final Map<CellLoc, Set<CellLoc>> singleRequired = new HashMap<>();
@@ -90,7 +92,8 @@ public class DependencyGraph {
 	private void recursiveUpdateOrder(CellLoc start, Map<CellLoc, VisitedState> visited, 
 									  List<CellLoc> result) {
 		if (visited.get(start) == VisitedState.IN_CURRENT_SUBGRAPH) {
-			throw new CycleError("Reference cycle detected at cell " + start + ".");
+			throw new CellError(ErrorType.CYCLE, 
+					"Reference cycle detected at cell " + start + ".");
 		}
 		else if (visited.get(start) == VisitedState.IN_WHOLE_GRAPH) {
 			return;

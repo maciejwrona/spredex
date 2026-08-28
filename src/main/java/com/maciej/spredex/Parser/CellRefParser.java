@@ -1,6 +1,8 @@
 package com.maciej.spredex.Parser;
 
+import com.maciej.spredex.CellError;
 import com.maciej.spredex.CellLoc;
+import com.maciej.spredex.ErrorType;
 import com.maciej.spredex.CellRef.SingleCellRef;
 
 public class CellRefParser {
@@ -43,13 +45,14 @@ public class CellRefParser {
 		if (!isAtEnd() ||
 			(lockedRow && row == 0) ||
 			(row >= maxRow || column >= maxColumn)) {
-			throw new ParseError("Reference parsing error.");
+			throw new CellError(ErrorType.PARSE, "Reference parsing error.");
 		}
 
 		return new SingleCellRef(((lockedRow || row == 0) ? row : row - currentCell.row()), 
 								 ((lockedColumn || column == 0) ? column : column - currentCell.column()), 
 								  lockedRow, lockedColumn);
 	}
+
 
 	private boolean isAtEnd() {
 		return current >= textRef.length();
