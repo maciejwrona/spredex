@@ -5,6 +5,7 @@ import com.maciej.spredex.CellLoc;
 import com.maciej.spredex.CellRef.CellRef;
 import com.maciej.spredex.Errors.ExcelError;
 import com.maciej.spredex.Interpreter.Interpreter;
+import com.maciej.spredex.Parser.FormulaParser;
 import com.maciej.spredex.Parser.NonFormulaParser;
 import com.maciej.spredex.Parser.ParseResult;
 import com.maciej.spredex.Parser.Parser;
@@ -69,15 +70,18 @@ public class Sheet extends AbstractTableModel {
 	}
 
 	private ParseResult formulaToAst(String formula, CellLoc target) {
+		Parser parser;
+
 		if (!isFormula(formula)) {
-			NonFormulaParser parser = new NonFormulaParser(formula);
-			return parser.parse();
+			parser = new NonFormulaParser(formula);
+		}
+		else {
+			Lexer lexer = new Lexer(formula);
+			List<Token> tokens = lexer.tokenize();
+
+			parser = new FormulaParser(tokens, target, maxRows, maxColumns);
 		}
 
-		Lexer lexer = new Lexer(formula);
-		List<Token> tokens = lexer.tokenize();
-
-		Parser parser = new Parser(tokens, target, maxRows, maxColumns);
 		return parser.parse();
 	}
 

@@ -14,7 +14,7 @@ import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-class ParserTest {
+class FormulaParserTest {
 	@Test
 	@DisplayName("Should parse standard expression")
 	void testStandardAst() {
@@ -33,7 +33,7 @@ class ParserTest {
 		);
 		CellLoc currentLocation = new CellLoc(10, 10);
 
-		Parser parser = new Parser(tokens, currentLocation, 100000, 100000);
+		Parser parser = new FormulaParser(tokens, currentLocation, 100000, 100000);
 		ParseResult result = parser.parse();
 
 		Expression expected = new Expression.Binary(
@@ -66,7 +66,7 @@ class ParserTest {
 		);
 		CellLoc currentLocation = new CellLoc(0, 0);
 
-		Parser parser = new Parser(tokens, currentLocation, 100000, 100000);
+		Parser parser = new FormulaParser(tokens, currentLocation, 100000, 100000);
 		ParseResult result = parser.parse();
 
 		Expression expected = new Expression.Call(

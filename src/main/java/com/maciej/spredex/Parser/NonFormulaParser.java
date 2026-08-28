@@ -4,13 +4,14 @@ import com.maciej.spredex.Parser.Expressions.Expression;
 
 import java.util.ArrayList;
 
-public class NonFormulaParser {
+public class NonFormulaParser implements Parser {
 	private final String nonFormula;
 
 	public NonFormulaParser(String nonFormula) {
 		this.nonFormula = nonFormula;
 	}
 
+	@Override
 	public ParseResult parse() {
 		Object value = nonFormula;
 		try {
