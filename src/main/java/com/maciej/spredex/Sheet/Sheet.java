@@ -3,6 +3,7 @@ package com.maciej.spredex.Sheet;
 import com.maciej.spredex.CellCoordinates;
 import com.maciej.spredex.CellError;
 import com.maciej.spredex.CellLoc;
+import com.maciej.spredex.CellRange;
 import com.maciej.spredex.ErrorType;
 import com.maciej.spredex.CellRef.CellRef;
 import com.maciej.spredex.Interpreter.Interpreter;
@@ -153,6 +154,10 @@ public class Sheet extends AbstractTableModel {
 
 	private boolean isFormula(String formula) {
 		return (formula.length() > 0 && formula.charAt(0) == '=');
+	}
+
+	public List<CellLoc> cellsInRange(CellRange range) {
+		return cells.getCellLocationsInRange(range);
 	}
 
 	@Override

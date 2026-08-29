@@ -40,6 +40,10 @@ public class RangeRef extends CellRef {
 
 	@Override
 	public CellCoordinates toCoordinates(CellLoc currentLocation, int maxRow, int maxColumn) {
+		return toRange(currentLocation, maxRow, maxColumn);
+	}
+
+	public CellRange toRange(CellLoc currentLocation, int maxRow, int maxColumn) {
 		// Convert unbounded rows / columns to 0-max
 		CellLoc newLeft = SingleCellRef.refToLoc(left, currentLocation);
 		CellLoc newRight = SingleCellRef.refToLoc(right, currentLocation);

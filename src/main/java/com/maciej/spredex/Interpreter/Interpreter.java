@@ -10,7 +10,7 @@ import com.maciej.spredex.CellRef.CellRefVisitor;
 import com.maciej.spredex.CellRef.RangeRef;
 import com.maciej.spredex.CellRef.SingleCellRef;
 import com.maciej.spredex.ErrorType;
-import com.maciej.spredex.Function.ExcelFunction;
+import com.maciej.spredex.Function.SpredexFunction;
 import com.maciej.spredex.Parser.Expressions.Expression;
 import com.maciej.spredex.Parser.Expressions.Expression.*;
 import com.maciej.spredex.Parser.Expressions.ExpressionVisitor;
@@ -20,11 +20,11 @@ import com.maciej.spredex.Sheet.Sheet;
 public class Interpreter implements ExpressionVisitor<Object>, CellRefVisitor<Object> {
 	private final Sheet sheet;
 
-	private final Map<String, ExcelFunction> functions;
+	private final Map<String, SpredexFunction> functions;
 	
 	private CellLoc location;
 
-	public Interpreter(Sheet sheet, Map<String, ExcelFunction> functions) {
+	public Interpreter(Sheet sheet, Map<String, SpredexFunction> functions) {
 		this.sheet = sheet;
 		this.functions = functions;
 	}
@@ -115,7 +115,7 @@ public class Interpreter implements ExpressionVisitor<Object>, CellRefVisitor<Ob
 
 	@Override
 	public Object visitCallExpression(Call expression) {
-		ExcelFunction function = functions.get(expression.identifier().lexeme());
+		SpredexFunction function = functions.get(expression.identifier().lexeme());
 		if (function == null) {
 			throw new CellError(ErrorType.IDENTIFIER, 
 					expression.identifier().lexeme() + " is not a function.");
@@ -126,7 +126,7 @@ public class Interpreter implements ExpressionVisitor<Object>, CellRefVisitor<Ob
 			arguments.add(evaluate(argument));
 		}
 
-		if (arguments.size() != function.arity()) {
+		if (!function.arity().matches(arguments.size())) {
 			throw new CellError(ErrorType.IDENTIFIER, 
 					"Expected " + function.arity() + " arguments for function " + expression.identifier().lexeme() + ".");
 		}
