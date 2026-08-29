@@ -2,13 +2,15 @@ package com.maciej.spredex.Sheet.DependencyGraph;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertIterableEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -16,45 +18,54 @@ import org.junit.jupiter.api.Test;
 import com.maciej.spredex.CellLoc;
 import com.maciej.spredex.CellRange;
 import com.maciej.spredex.CellCoordinates;
-import com.maciej.spredex.CellError;
 
 class DependencyGraphTest {
 
 	private final int maxRows = 1000000;
 	private final DependencyGraph graph = new DependencyGraph(maxRows);
+
+	private static final List<CellLoc> cells = new ArrayList<>();
+
+	@BeforeAll
+	static void InitializeCellsList() {
+		cells.add(null);
+		for (int i = 1; i <= 10; i++) {
+			cells.add(new CellLoc(i, i));
+		}
+	}
 	
 	@Test
 	@DisplayName("Should correctly add single dependencies")
 	void testAddSingleDependencies() {
-		graph.updateRequired(new CellLoc(1, 1), Set.of(new CellLoc(2,3), new CellLoc(3, 2)));
-		graph.updateRequired(new CellLoc(1, 1), Set.of(new CellLoc(3,3)));
+		graph.updateRequired(cells.get(1), Set.of(new CellLoc(2,3), new CellLoc(3, 2)));
+		graph.updateRequired(cells.get(1), Set.of(new CellLoc(3,3)));
 		graph.updateRequired(new CellLoc(4, 3), Set.of(new CellLoc(3,3)));
-		graph.updateRequired(new CellLoc(3, 3), Set.of(new CellLoc(2,2)));
+		graph.updateRequired(cells.get(3), Set.of(new CellLoc(2,2)));
 
-		assertThat(graph.getSingleRequired(new CellLoc(1, 1)))
-			.containsExactlyInAnyOrderElementsOf(List.of(new CellLoc(3, 3)));
-		assertThat(graph.getSingleDependent(new CellLoc(3, 3)))
-			.containsExactlyInAnyOrderElementsOf(List.of(new CellLoc(1, 1), new CellLoc(4, 3)));
+		assertThat(graph.getSingleRequired(cells.get(1)))
+			.containsExactlyInAnyOrderElementsOf(List.of(cells.get(3)));
+		assertThat(graph.getSingleDependent(cells.get(3)))
+			.containsExactlyInAnyOrderElementsOf(List.of(cells.get(1), new CellLoc(4, 3)));
 	}
 
 	@Test
 	@DisplayName("Should correctly add range dependencies")
 	void testAddRangeDependencies() {
 		List<CellRange> rangesRequired = List.of(
-					new CellRange(new CellLoc(3, 3), new CellLoc(4, 4)),
-					new CellRange(new CellLoc(4, 4), new CellLoc(5, 5)));
+					new CellRange(cells.get(3), cells.get(4)),
+					new CellRange(cells.get(4), cells.get(5)));
 		List<CellCoordinates> required = new ArrayList<>(rangesRequired);
-		graph.updateRequired(new CellLoc(1, 1), required);
+		graph.updateRequired(cells.get(1), required);
 
 		assertThat(graph.getRangesRequired(new CellLoc(1,1)))
 			.containsExactlyInAnyOrderElementsOf(rangesRequired);
 		assertThat(graph.getDependentOnRange(
-					new CellRange(new CellLoc(3, 3), new CellLoc(4, 4))))
-			.containsExactlyInAnyOrderElementsOf(List.of(new CellLoc(1, 1)));
+					new CellRange(cells.get(3), cells.get(4))))
+			.containsExactlyInAnyOrderElementsOf(List.of(cells.get(1)));
 
 
-		graph.updateRequired(new CellLoc(1, 1), new ArrayList<>());
-		assertEquals(0, graph.getRangesRequired(new CellLoc(1, 1)).size());
+		graph.updateRequired(cells.get(1), new ArrayList<>());
+		assertEquals(0, graph.getRangesRequired(cells.get(1)).size());
 	}
 
 	@Nested
@@ -64,11 +75,11 @@ class DependencyGraphTest {
 		@DisplayName("Should return correct update order on a straight path")
 		void testSimplePath() {
 			List<CellLoc> path = List.of(
-					new CellLoc(1, 1),
-					new CellLoc(2, 2),
-					new CellLoc(3, 3),
-					new CellLoc(4, 4),
-					new CellLoc(5, 5)
+					cells.get(1),
+					cells.get(2),
+					cells.get(3),
+					cells.get(4),
+					cells.get(5)
 			);
 
 			for (int i = path.size() - 1; i >= 1; i--) {
@@ -90,12 +101,6 @@ class DependencyGraphTest {
 			 *    | |/
 			 * (4, 4)
 			 */
-			List<CellLoc> cells = new ArrayList<>();
-			cells.add(null); // cover the 0
-			for (int i = 1; i <= 4; i++) {
-				cells.add(new CellLoc(i, i));
-			}
-
 			graph.updateRequired(cells.get(2), List.of(cells.get(1), cells.get(4)));
 			graph.updateRequired(cells.get(3), List.of(cells.get(1)));
 			graph.updateRequired(cells.get(4), List.of(cells.get(3)));
@@ -107,11 +112,6 @@ class DependencyGraphTest {
 		@Test
 		@DisplayName("Should return correct update order on range inputs")
 		void testRangePath() {
-			List<CellLoc> cells = new ArrayList<>();
-			cells.add(null); // cover the 0
-			for (int i = 1; i <= 4; i++) {
-				cells.add(new CellLoc(i, i));
-			}
 			CellRange range = new CellRange(cells.get(2), cells.get(3));
 
 			graph.updateRequired(cells.get(1), List.of(range));
@@ -122,13 +122,29 @@ class DependencyGraphTest {
 		}
 
 		@Test
-		@DisplayName("Should throw CycleError")
+		@DisplayName("Should correctly detect cycles")
 		void testCycle() {
-			graph.updateRequired(
-					new CellLoc(1, 1), List.of(new CellLoc(2, 2), new CellLoc(3, 3)));
-			assertThatThrownBy(() -> graph.updateRequired(
-					new CellLoc(3, 3), List.of(new CellRange(new CellLoc(1, 1), new CellLoc(2, 2)))))
-				.isInstanceOf(CellError.class);
+			Optional<CycleError> noError = graph.updateRequired(cells.get(1), 
+					List.of(cells.get(2), cells.get(3)));
+			Optional<CycleError> error = graph.updateRequired(cells.get(3), 
+					List.of(new CellRange(cells.get(1), cells.get(2))));
+
+			assertTrue(noError.isEmpty());
+			assertTrue(error.isPresent());
+		}
+
+		@Test
+		@DisplayName("Should output correct cycle location")
+		void testCycleLocation() {
+			graph.updateRequired(cells.get(2), List.of(cells.get(3), cells.get(1)));
+			graph.updateRequired(cells.get(3), List.of(cells.get(2)));
+			Optional<CycleError> error = graph.updateRequired(
+					cells.get(1), new ArrayList<>());
+
+			assertTrue(error.isPresent());
+
+			CellLoc location = error.get().location();
+			assertTrue(location.equals(cells.get(2)) || location.equals(cells.get(3)));
 		}
 	}
 }

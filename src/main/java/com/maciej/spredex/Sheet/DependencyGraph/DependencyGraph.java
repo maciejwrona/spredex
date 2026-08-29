@@ -7,13 +7,12 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 
 import com.maciej.spredex.CellCoordinates;
-import com.maciej.spredex.CellError;
 import com.maciej.spredex.CellLoc;
 import com.maciej.spredex.CellRange;
-import com.maciej.spredex.ErrorType;
 
 public class DependencyGraph {
 	private final Map<CellLoc, Set<CellLoc>> singleRequired = new HashMap<>();
@@ -28,11 +27,11 @@ public class DependencyGraph {
 		this.rangeResolver = new DoubleTreeResolver(maxRows);
 	}
 
-	public void updateRequired(CellLoc by, Collection<CellCoordinates> required) {
+	public Optional<CycleError> updateRequired(CellLoc by, Collection<CellCoordinates> required) {
 		deletePreviousRequired(by);
 		setNewRequired(by, required);
 		updateNewDependents(by);
-		verifyNoCycles(by, new HashMap<>());
+		return verifyNoCycles(by, new HashMap<>());
 	}
 
 	private void deletePreviousRequired(CellLoc by) {
@@ -79,28 +78,34 @@ public class DependencyGraph {
 		IN_WHOLE_GRAPH,
 	}
 
-	private void verifyNoCycles(CellLoc start, Map<CellLoc, VisitedState> visited) {
+	private Optional<CycleError> verifyNoCycles(CellLoc start, Map<CellLoc, VisitedState> visited) {
 		if (visited.get(start) == VisitedState.IN_CURRENT_SUBGRAPH) {
-			throw new CellError(ErrorType.CYCLE,
-					"Reference cycle detected at cell " + start + ".");
+			return Optional.of(new CycleError(start));
 		}
 		else if (visited.get(start) == VisitedState.IN_WHOLE_GRAPH) {
-			return;
+			return Optional.empty();
 		}
 
 		visited.put(start, VisitedState.IN_CURRENT_SUBGRAPH);
 
 		for (CellLoc cell : singleDependent.getOrDefault(start, Collections.emptySet())) {
-			verifyNoCycles(cell, visited);	
+			Optional<CycleError> result = verifyNoCycles(cell, visited);
+			if (result.isPresent()) {
+				return result;
+			}
 		}
 
 		for (CellRange range : rangeResolver.getRangesContainingCell(start)) {
 			for (CellLoc cell : dependentOnRange.get(range)) {
-				verifyNoCycles(cell, visited);
+				Optional<CycleError> result = verifyNoCycles(cell, visited);
+				if (result.isPresent()) {
+					return result;
+				}
 			}
 		}
 
 		visited.put(start, VisitedState.IN_WHOLE_GRAPH);
+		return Optional.empty();
 	}
 
 	// Returns the topological sort of the subgraph connected to start

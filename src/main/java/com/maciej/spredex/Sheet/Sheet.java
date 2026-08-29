@@ -3,20 +3,22 @@ package com.maciej.spredex.Sheet;
 import com.maciej.spredex.CellCoordinates;
 import com.maciej.spredex.CellError;
 import com.maciej.spredex.CellLoc;
+import com.maciej.spredex.ErrorType;
 import com.maciej.spredex.CellRef.CellRef;
 import com.maciej.spredex.Interpreter.Interpreter;
 import com.maciej.spredex.Parser.FormulaParser;
 import com.maciej.spredex.Parser.NonFormulaParser;
 import com.maciej.spredex.Parser.ParseResult;
 import com.maciej.spredex.Parser.Parser;
-import com.maciej.spredex.Parser.Expressions.Expression;
 import com.maciej.spredex.Parser.Lexer.Lexer;
 import com.maciej.spredex.Parser.Lexer.Token;
+import com.maciej.spredex.Sheet.DependencyGraph.CycleError;
 import com.maciej.spredex.Sheet.DependencyGraph.DependencyGraph;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Optional;
 
 import javax.swing.table.AbstractTableModel;
 
@@ -58,16 +60,21 @@ public class Sheet extends AbstractTableModel {
 
 	private void updateAst(CellLoc target) {
 		Cell cell = cellAt(target);
+		ParseResult parseResult = new ParseResult(null, new ArrayList<>());
 
-		// TODO: seperate catching parsing errors from cycles
-		// Catches parsing and cycle errors
 		try {
-			ParseResult result = formulaToAst(cell.formula(), target);
-			setAstAndRequired(target, result.ast(), result.requires());
+			parseResult = formulaToAst(cell.formula(), target);
 		}
 		catch (CellError error) {
 			setErrorAt(target, error);
-			setAstAndRequired(target, null, new ArrayList<>());
+		}
+		cell.setAst(parseResult.ast());
+
+		Optional<CycleError> error = setRequired(target, parseResult.requires());
+		if (error.isPresent()) {
+			CellLoc cycleCell = error.get().location();
+			setErrorAt(cycleCell, new CellError(ErrorType.CYCLE, 
+						"Reference cycle found at cell " + cycleCell + "."));
 		}
 	}
 
@@ -87,14 +94,12 @@ public class Sheet extends AbstractTableModel {
 		return parser.parse();
 	}
 
-	private void setAstAndRequired(CellLoc target, Expression ast, List<CellRef> required) {
-		cellAt(target).setAst(ast);
-
+	private Optional<CycleError> setRequired(CellLoc target, List<CellRef> required) {
 		List<CellCoordinates> newRequired = new ArrayList<>();
 		for (CellRef ref : required) {
 			newRequired.add(ref.toCoordinates(target, maxRows, maxColumns));
 		}
-		graph.updateRequired(target, newRequired);
+		return graph.updateRequired(target, newRequired);
 	}
 
 	// Updates the value at target, also updating every cell affected
