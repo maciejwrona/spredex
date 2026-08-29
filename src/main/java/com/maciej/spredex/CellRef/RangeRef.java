@@ -45,8 +45,8 @@ public class RangeRef extends CellRef {
 
 	public CellRange toRange(CellLoc currentLocation, int maxRow, int maxColumn) {
 		// Convert unbounded rows / columns to 0-max
-		CellLoc newLeft = SingleCellRef.refToLoc(left, currentLocation);
-		CellLoc newRight = SingleCellRef.refToLoc(right, currentLocation);
+		CellLoc newLeft = left.toLoc(currentLocation);
+		CellLoc newRight = right.toLoc(currentLocation);
 
 		if (right.row() == 0) {
 			newRight = new CellLoc(maxRow, newRight.column());

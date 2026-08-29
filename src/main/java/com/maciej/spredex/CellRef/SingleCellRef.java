@@ -36,7 +36,7 @@ public class SingleCellRef extends CellRef {
 
 	@Override
 	public CellCoordinates toCoordinates(CellLoc currentLocation, int maxRow, int maxColumn) {
-		return refToLoc(this, currentLocation);
+		return toLoc(currentLocation);
 	}
 
 	@Override
@@ -49,11 +49,11 @@ public class SingleCellRef extends CellRef {
 				lockedRow == that.lockedRow && lockedColumn == that.lockedColumn);
 	}
 
-	public static CellLoc refToLoc(SingleCellRef ref, CellLoc currentLocation) {
-		int row = 
-			ref.lockedRow ? ref.row : ref.row + currentLocation.row();
-		int column = 
-			ref.lockedColumn ? ref.column : ref.column + currentLocation.column();
-		return new CellLoc(row, column);
+	public CellLoc toLoc(CellLoc currentLocation) {
+		int locRow = 
+			lockedRow ? row : row + currentLocation.row();
+		int locColumn = 
+			lockedColumn ? column : column + currentLocation.column();
+		return new CellLoc(locRow, locColumn);
 	}
 }

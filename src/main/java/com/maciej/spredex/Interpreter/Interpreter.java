@@ -146,7 +146,7 @@ public class Interpreter implements ExpressionVisitor<Object>, CellRefVisitor<Ob
 
 	@Override
 	public Object visitSingleCellRef(SingleCellRef ref) {
-		CellLoc target = SingleCellRef.refToLoc(ref, location);
+		CellLoc target = ref.toLoc(location);
 
 		if (sheet.isErrorAt(target)) {
 			throw new CellError(ErrorType.TYPE, 
