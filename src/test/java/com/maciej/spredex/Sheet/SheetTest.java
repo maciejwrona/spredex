@@ -2,6 +2,7 @@ package com.maciej.spredex.Sheet;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertIterableEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.ArrayList;
@@ -13,6 +14,7 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
 import com.maciej.spredex.CellLoc;
+import com.maciej.spredex.CellRange;
 
 class SheetTest {
 	private final int maxRows = 100000;
@@ -149,5 +151,19 @@ class SheetTest {
 
 			assertEquals(2.0, sheet.valueAt(cells.get(2)));
 		}
+	}
+
+	@Test
+	@DisplayName("Should correctly return cells in range")
+	void testGetCellRange() {
+		sheet.setCell(cells.get(1), "hello");
+		sheet.setCell(cells.get(3), "bye");
+
+		assertIterableEquals(List.of(cells.get(1)), 
+				sheet.cellsInRange(new CellRange(cells.get(1), cells.get(2))));
+		assertIterableEquals(List.of(cells.get(1)), 
+				sheet.cellsInRange(new CellRange(cells.get(1), new CellLoc(maxRows - 1, 1))));
+		assertIterableEquals(List.of(cells.get(1), cells.get(3)), 
+				sheet.cellsInRange(new CellRange(cells.get(1), cells.get(5))));
 	}
 }

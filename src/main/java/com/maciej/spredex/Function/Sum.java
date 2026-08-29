@@ -26,7 +26,7 @@ public class Sum extends SpredexFunction {
 		return switch (arg) {
 			case Double d -> d;
 			case RangeRef ref -> getRefSum(ref, location, sheet);
-			default -> throw typeError("Invalid argument type");
+			default -> throw typeError("Invalid argument type " + arg.getClass() + ".");
 		};
 	}
 	
@@ -38,7 +38,7 @@ public class Sum extends SpredexFunction {
 		for (CellLoc cell : sheet.cellsInRange(range)) {
 			result += switch (sheet.valueAt(cell)) {
 				case Double d -> d;
-				default -> throw typeError("Invalid argument type");
+				default -> throw typeError("Invalid argument type at cell " + cell + ".");
 			};
 		}
 
