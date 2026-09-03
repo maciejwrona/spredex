@@ -4,7 +4,6 @@ import com.maciej.spredex.CellCoordinates;
 import com.maciej.spredex.CellError;
 import com.maciej.spredex.CellLoc;
 import com.maciej.spredex.CellRange;
-import com.maciej.spredex.ErrorType;
 import com.maciej.spredex.CellRef.CellRef;
 import com.maciej.spredex.Interpreter.Interpreter;
 import com.maciej.spredex.Parser.FormulaParser;
@@ -13,13 +12,11 @@ import com.maciej.spredex.Parser.ParseResult;
 import com.maciej.spredex.Parser.Parser;
 import com.maciej.spredex.Parser.Lexer.Lexer;
 import com.maciej.spredex.Parser.Lexer.Token;
-import com.maciej.spredex.Sheet.DependencyGraph.CycleError;
 import com.maciej.spredex.Sheet.DependencyGraph.DependencyGraph;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Optional;
 
 import javax.swing.table.AbstractTableModel;
 
@@ -40,7 +37,7 @@ public class Sheet extends AbstractTableModel {
 
 	public Object valueAt(CellLoc location) {
 		if (isCellEmpty(location)) {
-			return null;
+			return new EmptyCell();
 		}
 
 		return cellAt(location).value();
@@ -71,12 +68,7 @@ public class Sheet extends AbstractTableModel {
 		}
 		cell.setAst(parseResult.ast());
 
-		Optional<CycleError> error = setRequired(target, parseResult.requires());
-		if (error.isPresent()) {
-			CellLoc cycleCell = error.get().location();
-			setErrorAt(cycleCell, new CellError(ErrorType.CYCLE, 
-						"Reference cycle found at cell " + cycleCell + "."));
-		}
+		setRequired(target, parseResult.requires());
 	}
 
 	private ParseResult formulaToAst(String formula, CellLoc target) {
@@ -95,12 +87,12 @@ public class Sheet extends AbstractTableModel {
 		return parser.parse();
 	}
 
-	private Optional<CycleError> setRequired(CellLoc target, List<CellRef> required) {
+	private void setRequired(CellLoc target, List<CellRef> required) {
 		List<CellCoordinates> newRequired = new ArrayList<>();
 		for (CellRef ref : required) {
 			newRequired.add(ref.toCoordinates(target, maxRows, maxColumns));
 		}
-		return graph.updateRequired(target, newRequired);
+		graph.setRequired(target, newRequired);
 	}
 
 	// Updates the value at target, also updating every cell affected
@@ -119,6 +111,10 @@ public class Sheet extends AbstractTableModel {
 			return;
 		}
 
+		if (graph.isInCycle(location)) {
+			setErrorAt(location, "#CYCLE");
+			return;
+		}
 
 		try {
 			Object value = interpreter.interpret(cell.ast(), location);
@@ -133,7 +129,7 @@ public class Sheet extends AbstractTableModel {
 	}
 
 	public boolean isErrorAt(CellLoc location) {
-		return (isCellEmpty(location) || cellAt(location).error());
+		return (!isCellEmpty(location) && cellAt(location).error());
 	}
 
 	private Cell cellAt(CellLoc location) {
@@ -145,10 +141,14 @@ public class Sheet extends AbstractTableModel {
 	}
 
 	private void setErrorAt(CellLoc target, CellError error) {
+		String errorValue = "#" + error.getType().toString();
+		setErrorAt(target, errorValue);
+	}
+
+	private void setErrorAt(CellLoc target, String errorValue) {
 		Cell cell = cellAt(target);
 
-		String value = "#" + error.getType().toString();
-		cell.setValue(value);
+		cell.setValue(errorValue);
 		cell.setError(true);	
 	}
 

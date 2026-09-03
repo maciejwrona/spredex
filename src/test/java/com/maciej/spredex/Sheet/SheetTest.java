@@ -60,7 +60,7 @@ class SheetTest {
 			sheet.setCell(cells.get(1), "hello");
 			sheet.setCell(cells.get(1), "");
 
-			assertEquals(null, sheet.valueAt(cells.get(1)));
+			assertEquals(new EmptyCell(), sheet.valueAt(cells.get(1)));
 		}
 	}
 

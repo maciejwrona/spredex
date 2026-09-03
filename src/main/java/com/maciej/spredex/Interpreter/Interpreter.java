@@ -15,6 +15,7 @@ import com.maciej.spredex.Parser.Expressions.Expression;
 import com.maciej.spredex.Parser.Expressions.Expression.*;
 import com.maciej.spredex.Parser.Expressions.ExpressionVisitor;
 import com.maciej.spredex.Parser.Lexer.Token;
+import com.maciej.spredex.Sheet.EmptyCell;
 import com.maciej.spredex.Sheet.Sheet;
 
 public class Interpreter implements ExpressionVisitor<Object>, CellRefVisitor<Object> {
@@ -153,7 +154,8 @@ public class Interpreter implements ExpressionVisitor<Object>, CellRefVisitor<Ob
 					"Cell at " + target + " is not available.");
 		}
 
-		return sheet.valueAt(target);
+		Object value = sheet.valueAt(target);
+		return ((value instanceof EmptyCell) ? 0.0 : value);
 	}
 
 	@Override
