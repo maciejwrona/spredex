@@ -13,26 +13,35 @@ import com.maciej.spredex.Parser.Parser;
 import com.maciej.spredex.Parser.Lexer.Lexer;
 import com.maciej.spredex.Parser.Lexer.Token;
 import com.maciej.spredex.Sheet.DependencyGraph.DependencyGraph;
+import com.maciej.spredex.Function.SpredexFunction;
+import com.maciej.spredex.Function.Sum;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import javax.swing.table.AbstractTableModel;
 
 public class Sheet extends AbstractTableModel {
 	private final SparseMatrix cells;
+	private final Map<String, SpredexFunction> functions = new HashMap<>();
 	private final Interpreter interpreter;
 	private final DependencyGraph graph;
 	private final int maxRows;
 	private final int maxColumns;
 
 	public Sheet(int maxRows, int maxColumns) {
+		initializeFunctions();
 		this.cells = new SparseMatrix();
 		this.graph = new DependencyGraph(maxRows);
-		this.interpreter = new Interpreter(this, new HashMap<>());
+		this.interpreter = new Interpreter(this, functions);
 		this.maxRows = maxRows;
 		this.maxColumns = maxColumns;
+	}
+
+	private void initializeFunctions() {
+		functions.put("SUM", new Sum());
 	}
 
 	public Object valueAt(CellLoc location) {
@@ -126,6 +135,7 @@ public class Sheet extends AbstractTableModel {
 			return;
 		}
 
+		fireCellUpdate(location);
 	}
 
 	public boolean isErrorAt(CellLoc location) {
@@ -150,6 +160,11 @@ public class Sheet extends AbstractTableModel {
 
 		cell.setValue(errorValue);
 		cell.setError(true);	
+		fireCellUpdate(target);
+	}
+
+	private void fireCellUpdate(CellLoc cell) {
+		fireTableCellUpdated(cell.row() - 1, cell.column() - 1);
 	}
 
 	private boolean isFormula(String formula) {
@@ -172,7 +187,7 @@ public class Sheet extends AbstractTableModel {
 
 	@Override
 	public Object getValueAt(int rowIndex, int columnIndex) {
-		CellLoc location = new CellLoc(rowIndex, columnIndex);
+		CellLoc location = new CellLoc(rowIndex + 1, columnIndex + 1);
 
 		if (isCellEmpty(location)) {
 			return "";
@@ -181,13 +196,23 @@ public class Sheet extends AbstractTableModel {
 		return valueAt(location);
 	}
 
+	public String formulaAt(int row, int column) {
+		CellLoc location = new CellLoc(row + 1, column + 1);
+
+		if (isCellEmpty(location)) {
+			return "";
+		}
+
+		return cellAt(location).formula();
+	}
+
 	@Override
 	public void setValueAt(Object aValue, int rowIndex, int columnIndex) {
-		setCell(new CellLoc(rowIndex, columnIndex), aValue.toString());
+		setCell(new CellLoc(rowIndex + 1, columnIndex + 1), aValue.toString());
 	}
 
 	@Override
 	public boolean isCellEditable(int rowIndex, int columnIndex) {
-		return (rowIndex >= 1 && columnIndex >= 1);
+		return true;
 	}
 }
