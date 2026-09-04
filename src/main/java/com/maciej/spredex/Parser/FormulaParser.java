@@ -174,6 +174,12 @@ public class FormulaParser implements Parser {
 			Token right = nextToken();
 			result = new RangeRef(leftRef, tokenToReference(right));
 		}
+		else {
+			// Single references cannot be unbounded
+			if (leftRef.hasUnboundedColumn() || leftRef.hasUnboundedRow()) {
+				throw parseError("Invalid single cell reference.");
+			}
+		}
 
 		requires.add(result);
 		return new Expression.Reference(result);

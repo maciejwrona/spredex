@@ -36,11 +36,25 @@ public class DependencyGraph {
 	}
 
 	public void setRequired(CellLoc by, Collection<CellCoordinates> required) {
-		deletePreviousRequired(by);
-		setNewRequired(by, required);
-		updateNewDependents(by);
+		updateEdges(by, required);
 
-		updateCycles(by);
+		Set<CellLoc> toUpdate = getReachable(Set.of(by));
+		updateCycles(toUpdate);
+	}
+
+	public void setRequiredForMultipleCells(Map<CellLoc, Collection<CellCoordinates>> required) {
+		for (var entry : required.entrySet()) {
+			updateEdges(entry.getKey(), entry.getValue());
+		}
+		
+		Set<CellLoc> toUpdate = getReachable(required.keySet());
+		updateCycles(toUpdate);
+	}
+
+	private void updateEdges(CellLoc cell, Collection<CellCoordinates> newRequired) {
+		deletePreviousRequired(cell);
+		setNewRequired(cell, newRequired);
+		updateNewDependents(cell);
 	}
 
 	private void deletePreviousRequired(CellLoc by) {
@@ -82,9 +96,7 @@ public class DependencyGraph {
 		}
 	}
 
-	private void updateCycles(CellLoc start) {
-		Set<CellLoc> toUpdate = getReachable(start);
-
+	private void updateCycles(Set<CellLoc> toUpdate) {
 		List<Set<CellLoc>> sccs = getSccs(toUpdate);
 
 		Set<CellLoc> newCycleCacheFragment = getUpdatedCycleCacheFragment(sccs, toUpdate);
@@ -101,11 +113,13 @@ public class DependencyGraph {
 	}
 
 	// gets all cells visible from start using bfs
-	private Set<CellLoc> getReachable(CellLoc start) {
+	private Set<CellLoc> getReachable(Set<CellLoc> from) {
 		Set<CellLoc> visited = new HashSet<>();
 		Queue<CellLoc> next = new ArrayDeque<>();
-		visited.add(start);
-		next.add(start);
+		for (CellLoc cell : from) {
+			visited.add(cell);
+			next.add(cell);
+		}
 
 		while (!next.isEmpty()) {
 			CellLoc currentCell = next.poll();

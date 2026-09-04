@@ -79,6 +79,12 @@ class DependencyGraphTest {
 		assertEquals(List.of(cells.get(2), cells.get(3)), graph.getDependent(cells.get(1)));
 	}
 
+	@Test
+	@DisplayName("TEST TO WRITE")
+	void testAddingMultipleCells() {
+		assertTrue(true);
+	}
+
 	@Nested
 	@DisplayName("Test update order")
 	class UpdateOrderTests {

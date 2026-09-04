@@ -7,12 +7,14 @@ import com.maciej.spredex.Parser.Expressions.Expression;
 import com.maciej.spredex.Parser.Lexer.Token;
 import com.maciej.spredex.Parser.Lexer.TokenType;
 import com.maciej.spredex.CellRef.SingleCellRef;
+import com.maciej.spredex.CellRef.CellRef;
 import com.maciej.spredex.CellRef.RangeRef;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class FormulaParserTest {
 	@Test
@@ -48,9 +50,40 @@ class FormulaParserTest {
 	}
 
 	@Test
+	@DisplayName("Should parse normal ranges")
+	void testRange() {
+		// =SUM(A1:A2)
+		List<Token> tokens = List.of(
+			new Token(TokenType.EQUAL, "=", null),
+			new Token(TokenType.IDENTIFIER, "SUM", null),
+			new Token(TokenType.LEFT_PAREN, "(", null),
+			new Token(TokenType.IDENTIFIER, "A1", null),
+			new Token(TokenType.COLON, ":", null),
+			new Token(TokenType.IDENTIFIER, "A2", null),
+			new Token(TokenType.RIGHT_PAREN, ")", null)
+		);
+		CellLoc currentLocation = new CellLoc(2, 2);
+
+		Parser parser = new FormulaParser(tokens, currentLocation, 100000, 10000);
+		ParseResult result = parser.parse();
+
+		Expression expected = new Expression.Call(
+				new Token(TokenType.IDENTIFIER, "SUM", null), 
+				List.of(
+					new Expression.Reference(
+						new RangeRef(new SingleCellRef(-1, -1, false, false),
+								 	 new SingleCellRef(0, -1, false, false))
+					)
+				)
+		);
+
+		assertEquals(expected, result.ast());
+	}
+
+	@Test
 	@DisplayName("Should parse range references")
 	void testRangeCellReference() {
-		// =PROD(A1:B$10, 1:C)
+		// =PROD(A1:B$10, B:C)
 		List<Token> tokens = List.of(
 			new Token(TokenType.EQUAL, "=", null),
 			new Token(TokenType.IDENTIFIER, "PROD", null),
@@ -80,8 +113,8 @@ class FormulaParserTest {
 				),
 				new Expression.Reference(
 					new RangeRef(
-						new SingleCellRef(0, 2, false, false),
-						new SingleCellRef(0, 3, false, false)
+						new SingleCellRef(CellRef.unbounded(), 2, false, false),
+						new SingleCellRef(CellRef.unbounded(), 3, false, false)
 					)
 				)
 			)

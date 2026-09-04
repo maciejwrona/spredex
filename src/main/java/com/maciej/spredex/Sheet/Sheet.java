@@ -152,6 +152,7 @@ public class Sheet extends AbstractTableModel {
 
 	private void setErrorAt(CellLoc target, CellError error) {
 		String errorValue = "#" + error.getType().toString();
+		System.out.println(error.getMessage());
 		setErrorAt(target, errorValue);
 	}
 

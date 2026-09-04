@@ -22,11 +22,11 @@ public class SingleCellRef extends CellRef {
 	}
 
 	public boolean hasUnboundedColumn() {
-		return (!lockedColumn && column == 0);
+		return row == unbounded();
 	}
 
 	public boolean hasUnboundedRow() {
-		return (!lockedRow && row == 0);
+		return column == unbounded();
 	}
 
 	@Override

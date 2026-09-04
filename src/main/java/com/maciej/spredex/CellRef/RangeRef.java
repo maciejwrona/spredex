@@ -48,10 +48,10 @@ public class RangeRef extends CellRef {
 		CellLoc newLeft = left.toLoc(currentLocation);
 		CellLoc newRight = right.toLoc(currentLocation);
 
-		if (right.row() == 0) {
+		if (right.row() == unbounded()) {
 			newRight = new CellLoc(maxRow, newRight.column());
 		}
-		else if (right.column() == 0) {
+		else if (right.column() == unbounded()) {
 			newRight = new CellLoc(newRight.row(), maxColumn);
 		}
 

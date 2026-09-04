@@ -3,6 +3,7 @@ package com.maciej.spredex.Parser;
 import com.maciej.spredex.CellError;
 import com.maciej.spredex.CellLoc;
 import com.maciej.spredex.ErrorType;
+import com.maciej.spredex.CellRef.CellRef;
 import com.maciej.spredex.CellRef.SingleCellRef;
 
 public class CellRefParser {
@@ -48,11 +49,35 @@ public class CellRefParser {
 			throw new CellError(ErrorType.PARSE, "Reference parsing error.");
 		}
 
-		return new SingleCellRef(((lockedRow || row == 0) ? row : row - currentCell.row()), 
-								 ((lockedColumn || column == 0) ? column : column - currentCell.column()), 
-								  lockedRow, lockedColumn);
+		return getRefFromRead(row, column, lockedRow, lockedColumn, currentCell);
 	}
 
+	private SingleCellRef getRefFromRead(int readRow, int readColumn, 
+										 boolean lockedRow, boolean lockedColumn, CellLoc location) {
+		int row;
+		if (lockedRow) {
+			row = readRow;
+		}	
+		else if (readRow == 0) {
+			row = CellRef.unbounded();
+		}
+		else {
+			row = readRow - location.row();
+		}
+
+		int column;
+		if (lockedColumn) {
+			column = readColumn;
+		}	
+		else if (readColumn == 0) {
+			column = CellRef.unbounded();
+		}
+		else {
+			column = readColumn - location.column();
+		}
+
+		return new SingleCellRef(row, column, lockedRow, lockedColumn);
+	}
 
 	private boolean isAtEnd() {
 		return current >= textRef.length();

@@ -2,8 +2,8 @@ package com.maciej.spredex.Parser;
 
 import com.maciej.spredex.CellError;
 import com.maciej.spredex.CellLoc;
+import com.maciej.spredex.CellRef.CellRef;
 import com.maciej.spredex.CellRef.SingleCellRef;
-import com.maciej.spredex.Sheet.Cell;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -14,6 +14,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 class CellRefParserTest {
+	private final int unbounded = CellRef.unbounded();
 
 	@ParameterizedTest
 	@CsvSource({ 
@@ -38,18 +39,18 @@ class CellRefParserTest {
 
 	@ParameterizedTest
 	@CsvSource({ 
-		"$10,    0,  10,  false,    true", 
-		"A,     -9,   0,  false,   false"
+		"$10, 	 0,  10,  false,    true", 
+		"1,      0,  -9,  false,   false"
 	})
 	@DisplayName("Should correctly parse now row/column references")
-	void testMissingRowOrColumn(String textRef, String column, String row, 
+	void testMissingColumn(String textRef, String column, String row, 
 			  								   String lockedColumn, String lockedRow) {
 		CellRefParser parser = new CellRefParser(textRef, 100000, 100000);
 		CellLoc currentLocation = new CellLoc(10, 10);
 
 		SingleCellRef ref = parser.parse(currentLocation);
 
-		assertThat(ref.column()).isEqualTo(Integer.parseInt(column));
+		assertThat(ref.column()).isEqualTo(unbounded);
 		assertThat(ref.row()).isEqualTo(Integer.parseInt(row));
 		assertThat(ref.lockedColumn()).isEqualTo(Boolean.parseBoolean(lockedColumn));
 		assertThat(ref.lockedRow()).isEqualTo(Boolean.parseBoolean(lockedRow));
