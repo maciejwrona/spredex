@@ -20,7 +20,7 @@ public class FormulaEditor extends DefaultCellEditor {
 		JTextField field = (JTextField) getComponent();
 		field.setFont(font);
 
-		setClickCountToStart(1);
+		setClickCountToStart(2);
 	}
 
 	@Override

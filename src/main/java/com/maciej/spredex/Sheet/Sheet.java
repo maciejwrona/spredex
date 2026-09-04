@@ -17,9 +17,11 @@ import com.maciej.spredex.Function.SpredexFunction;
 import com.maciej.spredex.Function.Sum;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import javax.swing.table.AbstractTableModel;
 
@@ -40,6 +42,18 @@ public class Sheet extends AbstractTableModel {
 		this.maxColumns = maxColumns;
 	}
 
+	public void loadTable(List<List<String>> table) {
+		Map<CellLoc, String> formulas = new HashMap<>();
+		for (int i = 0; i < table.size(); i++) {
+			List<String> row = table.get(i);
+			for (int j = 0; j < row.size(); j++) {
+				CellLoc location = new CellLoc(i + 1, j + 1);
+				formulas.put(location, row.get(j));
+			}
+		}
+		setMultipleCells(formulas);
+	}
+
 	private void initializeFunctions() {
 		functions.put("SUM", new Sum());
 	}
@@ -52,38 +66,51 @@ public class Sheet extends AbstractTableModel {
 		return cellAt(location).value();
 	}
 
-	public void setCell(CellLoc target, String formula) {
-		if (formula.length() == 0) {
-			handleEmptyFormula(target);
-			return;
+	public void setCell(CellLoc location, String formula) {
+		Map<CellLoc, String> formulas = new HashMap<>();
+		formulas.put(location, formula);
+		setMultipleCells(formulas);
+	}
+
+	public void setMultipleCells(Map<CellLoc, String> formulas) {
+		Map<CellLoc, Collection<CellCoordinates>> required = new HashMap<>();
+
+		for (var entry : formulas.entrySet()) {
+			CellLoc location = entry.getKey();
+			String formula = entry.getValue();
+
+			if (formula.isBlank()) {
+				cells.deleteCell(location.row(), location.column());
+				required.put(location, new ArrayList<>());
+			}
+			else {
+				cells.createCell(location.row(), location.column());
+				Cell cell = cellAt(location);
+
+				cell.setFormula(formula);
+
+				ParseResult parseResult = parseFormulaAt(location);
+				cell.setAst(parseResult.ast());
+				required.put(location, toCoordinates(location, parseResult.requires()));
+			}
 		}
 
-		cells.createCell(target.row(), target.column());
-
-		cellAt(target).setFormula(formula);
-		updateAst(target);
-		updateValueRecursively(target);
+		graph.setRequiredForMultipleCells(required);
+		updateAll(formulas.keySet());
 	}
 
-	private void handleEmptyFormula(CellLoc target) {
-		cells.deleteCell(target.row(), target.column());
-		setRequired(target, new ArrayList<>());
-		updateValueRecursively(target);
-	}
-
-	private void updateAst(CellLoc target) {
-		Cell cell = cellAt(target);
+	private ParseResult parseFormulaAt(CellLoc location) {
+		Cell cell = cellAt(location);
 		ParseResult parseResult = new ParseResult(null, new ArrayList<>());
 
 		try {
-			parseResult = formulaToAst(cell.formula(), target);
+			parseResult = formulaToAst(cell.formula(), location);
 		}
 		catch (CellError error) {
-			setErrorAt(target, error);
+			setErrorAt(location, error);
 		}
-		cell.setAst(parseResult.ast());
 
-		setRequired(target, parseResult.requires());
+		return parseResult;
 	}
 
 	private ParseResult formulaToAst(String formula, CellLoc target) {
@@ -102,17 +129,17 @@ public class Sheet extends AbstractTableModel {
 		return parser.parse();
 	}
 
-	private void setRequired(CellLoc target, List<CellRef> required) {
-		List<CellCoordinates> newRequired = new ArrayList<>();
-		for (CellRef ref : required) {
-			newRequired.add(ref.toCoordinates(target, maxRows, maxColumns));
+	private List<CellCoordinates> toCoordinates(CellLoc location, List<CellRef> refs) {
+		List<CellCoordinates> coordinates = new ArrayList<>();
+		for (CellRef ref : refs) {
+			coordinates.add(ref.toCoordinates(location, maxRows, maxColumns));
 		}
-		graph.setRequired(target, newRequired);
+		return coordinates;
 	}
 
-	// Updates the value at target, also updating every cell affected
-	private void updateValueRecursively(CellLoc target) {
-		List<CellLoc> updateOrder = graph.getUpdateOrder(target);
+	// Updates every cell reachable from cells
+	private void updateAll(Set<CellLoc> cells) {
+		List<CellLoc> updateOrder = graph.getUpdateOrder(cells);
 
 		for (CellLoc location : updateOrder) {
 			updateValueOnlyAt(location);

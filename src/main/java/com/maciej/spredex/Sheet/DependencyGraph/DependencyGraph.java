@@ -250,12 +250,17 @@ public class DependencyGraph {
 				(scc.size() == 1 && getDependent(scc.iterator().next()).contains(scc.iterator().next())));
 	}
 
-	// Returns the topological sort of the subgraph connected to start
-	// If the graph is not a dag then returns the cells connected to start
-	public List<CellLoc> getUpdateOrder(CellLoc start) {
+	// Returns the topological sort of the subgraph connected to start cells
+	// Or the sccs topological order if not a dag
+	public List<CellLoc> getUpdateOrder(Set<CellLoc> start) {
 		List<CellLoc> result = new ArrayList<>();
+		Set<CellLoc> visited = new HashSet<>();
 
-		postOrderDFS(start, new HashSet<>(), result);
+		for (CellLoc cell : start) {
+			if (!visited.contains(cell)) {
+				postOrderDFS(cell, visited, result);
+			}
+		}
 		Collections.reverse(result);
 
 		return result;

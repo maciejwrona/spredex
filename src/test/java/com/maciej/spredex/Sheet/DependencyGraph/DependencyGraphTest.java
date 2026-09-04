@@ -121,7 +121,7 @@ class DependencyGraphTest {
 				graph.setRequired(path.get(i), List.of(path.get(i - 1)));
 			}
 
-			assertIterableEquals(path, graph.getUpdateOrder(path.get(0)));
+			assertIterableEquals(path, graph.getUpdateOrder(Set.of(path.get(0))));
 		}
 
 		@Test
@@ -141,7 +141,7 @@ class DependencyGraphTest {
 			graph.setRequired(cells.get(4), List.of(cells.get(3)));
 
 			assertIterableEquals(List.of(cells.get(1), cells.get(3), cells.get(4), cells.get(2)), 
-					     		 graph.getUpdateOrder(cells.get(1)));
+					     		 graph.getUpdateOrder(Set.of(cells.get(1))));
 		}
 
 		@Test
@@ -153,7 +153,7 @@ class DependencyGraphTest {
 			graph.setRequired(cells.get(4), List.of(cells.get(1), cells.get(2)));
 
 			assertIterableEquals(List.of(cells.get(2), cells.get(1), cells.get(4)), 
-								 graph.getUpdateOrder(cells.get(2)));
+								 graph.getUpdateOrder(Set.of(cells.get(2))));
 		}
 
 		@Test
@@ -174,7 +174,7 @@ class DependencyGraphTest {
 			graph.setRequired(cells.get(3), List.of(cells.get(2), cells.get(4)));
 
 			assertThat(List.of(cells.get(1), cells.get(2), cells.get(3), cells.get(4)))
-				.hasSameElementsAs(graph.getUpdateOrder(cells.get(4)));
+				.hasSameElementsAs(graph.getUpdateOrder(Set.of(cells.get(4))));
 		}
 	}
 

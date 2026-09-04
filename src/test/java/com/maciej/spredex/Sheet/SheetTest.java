@@ -6,7 +6,9 @@ import static org.junit.jupiter.api.Assertions.assertIterableEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.DisplayName;
@@ -165,5 +167,29 @@ class SheetTest {
 				sheet.cellsInRange(new CellRange(cells.get(1), new CellLoc(maxRows - 1, 1))));
 		assertIterableEquals(List.of(cells.get(1), cells.get(3)), 
 				sheet.cellsInRange(new CellRange(cells.get(1), cells.get(5))));
+	}
+
+	@Test
+	@DisplayName("Should correctly add multiple cells")
+	void testAddingMultipleCells() {
+		Map<CellLoc, String> formulas = new HashMap<>();
+		for (CellLoc cell : cells) {
+			if (cell != null) {
+				formulas.put(cell, "=A2");
+			}
+		}
+		formulas.put(cells.get(5), "=E5");
+
+		sheet.setMultipleCells(formulas);
+		
+		for (CellLoc cell : cells) {
+			if (cell != null && cell != cells.get(5)) {
+				assertEquals(0.0, sheet.valueAt(cell));
+				assertFalse(sheet.isErrorAt(cell));
+			}
+			else if (cell != null) {
+				assertTrue(sheet.isErrorAt(cell));
+			}
+		}
 	}
 }
