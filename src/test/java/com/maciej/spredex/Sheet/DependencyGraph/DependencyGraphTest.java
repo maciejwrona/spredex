@@ -7,7 +7,10 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import org.junit.jupiter.api.BeforeAll;
@@ -79,10 +82,25 @@ class DependencyGraphTest {
 		assertEquals(List.of(cells.get(2), cells.get(3)), graph.getDependent(cells.get(1)));
 	}
 
+	// TODO: write more!!!
 	@Test
-	@DisplayName("TEST TO WRITE")
+	@DisplayName("Should correctly add multiple cells")
 	void testAddingMultipleCells() {
-		assertTrue(true);
+		Map<CellLoc, Collection<CellCoordinates>> required = new HashMap<>();
+		required.put(cells.get(1), List.of(cells.get(2)));
+		required.put(cells.get(2), List.of(cells.get(1)));
+		required.put(cells.get(3), List.of(cells.get(7)));
+		required.put(cells.get(4), List.of(cells.get(8)));
+
+		graph.setRequiredForMultipleCells(required);
+
+		assertIterableEquals(List.of(cells.get(2)), graph.getDependent(cells.get(1)));
+		assertIterableEquals(List.of(cells.get(1)), graph.getDependent(cells.get(2)));
+		assertIterableEquals(List.of(cells.get(3)), graph.getDependent(cells.get(7)));
+		assertIterableEquals(List.of(cells.get(4)), graph.getDependent(cells.get(8)));
+
+		assertTrue(graph.isInCycle(cells.get(1)));
+		assertTrue(graph.isInCycle(cells.get(2)));
 	}
 
 	@Nested

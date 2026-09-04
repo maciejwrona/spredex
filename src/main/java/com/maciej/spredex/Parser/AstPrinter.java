@@ -7,6 +7,7 @@ import com.maciej.spredex.Parser.Expressions.Expression.Literal;
 import com.maciej.spredex.Parser.Expressions.Expression.Reference;
 import com.maciej.spredex.Parser.Expressions.Expression.Unary;
 import com.maciej.spredex.Parser.Expressions.ExpressionVisitor;
+import com.maciej.spredex.CellLoc;
 import com.maciej.spredex.CellRef.CellRef;
 import com.maciej.spredex.CellRef.CellRefVisitor;
 import com.maciej.spredex.CellRef.SingleCellRef;
@@ -14,9 +15,11 @@ import com.maciej.spredex.CellRef.RangeRef;
 import com.maciej.spredex.Parser.Expressions.Expression;
 
 public class AstPrinter implements ExpressionVisitor<String>, CellRefVisitor<String> {
+	private CellLoc location;
 
-	public void print(Expression expression) {
-		System.out.println(getString(expression));
+	public String convert(Expression ast, CellLoc location) {
+		this.location = location;
+		return getString(ast);
 	}
 
 	private String getString(Expression expression) {

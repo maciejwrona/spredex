@@ -54,7 +54,7 @@ public class Sheet extends AbstractTableModel {
 
 	public void setCell(CellLoc target, String formula) {
 		if (formula.length() == 0) {
-			cells.deleteCell(target.row(), target.column());
+			handleEmptyFormula(target);
 			return;
 		}
 
@@ -62,6 +62,12 @@ public class Sheet extends AbstractTableModel {
 
 		cellAt(target).setFormula(formula);
 		updateAst(target);
+		updateValueRecursively(target);
+	}
+
+	private void handleEmptyFormula(CellLoc target) {
+		cells.deleteCell(target.row(), target.column());
+		setRequired(target, new ArrayList<>());
 		updateValueRecursively(target);
 	}
 
@@ -116,7 +122,7 @@ public class Sheet extends AbstractTableModel {
 	private void updateValueOnlyAt(CellLoc location) {
 		Cell cell = cellAt(location);
 
-		if (cell.ast() == null) {
+		if (isCellEmpty(location) || cell.ast() == null) {
 			return;
 		}
 

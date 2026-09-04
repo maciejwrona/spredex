@@ -59,4 +59,17 @@ class LexerTest {
 		assertThatThrownBy(() -> lexer.tokenize())
 			.isInstanceOf(CellError.class);
 	}
+
+	@Test
+	@DisplayName("Should tokenize a function call")
+	void testFunction() {
+		String formula = "=SUM(A1, 34)";
+
+		Lexer lexer = new Lexer(formula);
+		List<Token> tokens = lexer.tokenize();
+
+		assertThat(tokens).
+			extracting(Token::lexeme)
+			.containsExactly("=", "SUM", "(", "A1", ",", "34", ")");
+	}
 }

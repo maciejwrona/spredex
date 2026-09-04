@@ -46,6 +46,7 @@ public class Lexer {
 			case ':': addToken(TokenType.COLON); break;
 			case ';': addToken(TokenType.SEMICOLON); break;
 			case '&': addToken(TokenType.AMPERSAND); break;
+			case ',': addToken(TokenType.COMMA); break;
 
 			case '=': addToken(TokenType.EQUAL); break;
 			case '!': 
