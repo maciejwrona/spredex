@@ -37,6 +37,7 @@ public class SpredexGui extends JFrame {
 
 		table.setTableHeader(header);
 		table.setDefaultEditor(Object.class, new FormulaEditor(sheet, bigFont));
+		table.setDefaultRenderer(Object.class, new ValueRenderer(sheet));
 
 		// Size
 		table.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);

@@ -127,7 +127,7 @@ public class Sheet extends AbstractTableModel {
 		}
 
 		if (graph.isInCycle(location)) {
-			setErrorAt(location, "#CYCLE");
+			setErrorAt(location, "#CYCLE", "Cilcular cell reference detected.");
 			return;
 		}
 
@@ -142,6 +142,10 @@ public class Sheet extends AbstractTableModel {
 		}
 
 		fireCellUpdate(location);
+	}
+
+	public boolean isErrorAt(int row, int column) {
+		return isErrorAt(new CellLoc(row + 1, column + 1));
 	}
 
 	public boolean isErrorAt(CellLoc location) {
@@ -159,14 +163,15 @@ public class Sheet extends AbstractTableModel {
 	private void setErrorAt(CellLoc target, CellError error) {
 		String errorValue = "#" + error.getType().toString();
 		System.out.println(error.getMessage());
-		setErrorAt(target, errorValue);
+		setErrorAt(target, errorValue, error.getMessage());
 	}
 
-	private void setErrorAt(CellLoc target, String errorValue) {
+	private void setErrorAt(CellLoc target, String errorValue, String errorMessage) {
 		Cell cell = cellAt(target);
 
 		cell.setValue(errorValue);
 		cell.setError(true);	
+		cell.setErrorMessage(errorMessage);
 		fireCellUpdate(target);
 	}
 
@@ -176,6 +181,11 @@ public class Sheet extends AbstractTableModel {
 
 	private boolean isFormula(String formula) {
 		return (formula.length() > 0 && formula.charAt(0) == '=');
+	}
+
+	public String getErrorMessageAt(int row, int column) {
+		CellLoc location = new CellLoc(row + 1, column + 1);
+		return (isCellEmpty(location) ? null : cellAt(new CellLoc(row + 1, column + 1)).errorMessage());
 	}
 
 	public List<CellLoc> cellsInRange(CellRange range) {
