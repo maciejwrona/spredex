@@ -14,7 +14,8 @@ import com.maciej.spredex.Parser.Lexer.Lexer;
 import com.maciej.spredex.Parser.Lexer.Token;
 import com.maciej.spredex.Sheet.DependencyGraph.DependencyGraph;
 import com.maciej.spredex.Function.SpredexFunction;
-import com.maciej.spredex.Function.Sum;
+import com.maciej.spredex.Function.Models.Average;
+import com.maciej.spredex.Function.Models.Sum;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -57,6 +58,7 @@ public class Sheet extends AbstractTableModel {
 
 	private void initializeFunctions() {
 		functions.put("SUM", new Sum());
+		functions.put("AVERAGE", new Average());
 	}
 
 	public Object valueAt(CellLoc location) {

@@ -6,4 +6,5 @@ public enum ErrorType {
 	TOKEN,
 	PARSE,
 	TYPE,
+	DIV,
 }

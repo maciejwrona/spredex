@@ -49,9 +49,11 @@ public class RangeRef extends CellRef {
 		CellLoc newRight = right.toLoc(currentLocation);
 
 		if (right.row() == unbounded()) {
+			newLeft = new CellLoc(1, newLeft.column());
 			newRight = new CellLoc(maxRow, newRight.column());
 		}
 		else if (right.column() == unbounded()) {
+			newLeft = new CellLoc(newLeft.row(), 1);
 			newRight = new CellLoc(newRight.row(), maxColumn);
 		}
 
