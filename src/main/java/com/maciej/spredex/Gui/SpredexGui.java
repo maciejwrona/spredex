@@ -1,6 +1,5 @@
 package com.maciej.spredex.Gui;
 
-import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Font;
 

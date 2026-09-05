@@ -7,6 +7,7 @@ import com.maciej.spredex.CellRef.CellRef;
 import com.maciej.spredex.CellRef.SingleCellRef;
 
 public class CellRefParser {
+	private final static int numberOfChars = 'Z' - 'A' + 1;
 	private final String textRef;
 	private final int maxRow;
 	private final int maxColumn;
@@ -100,7 +101,14 @@ public class CellRefParser {
 	}
 
 	public static String numberToColumn(int number) {
-		return "TODO";
+		String result = "";
+
+		while (number > 0) {
+			result = Character.toString((number - 1) % numberOfChars + 'A') + result;
+			number = (number - 1) / numberOfChars;
+		}
+
+		return result;
 	}
 
 	private int getColumnNumber(String column) {
@@ -108,7 +116,7 @@ public class CellRefParser {
 
 		for (int i = column.length() - 1; i >= 0; i--) {
 			result += 
-				Math.pow('z' - 'a' + 1, (column.length() - 1) - i) * 
+				Math.pow(numberOfChars, (column.length() - 1) - i) * 
 				(Character.toLowerCase(column.charAt(i)) - 'a' + 1);
 		}
 
