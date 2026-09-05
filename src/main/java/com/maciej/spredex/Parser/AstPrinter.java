@@ -8,6 +8,7 @@ import com.maciej.spredex.Parser.Expressions.Expression.Reference;
 import com.maciej.spredex.Parser.Expressions.Expression.Unary;
 import com.maciej.spredex.Parser.Expressions.ExpressionVisitor;
 import com.maciej.spredex.CellLoc;
+import com.maciej.spredex.CellRef.CellRef;
 import com.maciej.spredex.CellRef.CellRefVisitor;
 import com.maciej.spredex.CellRef.SingleCellRef;
 import com.maciej.spredex.CellRef.RangeRef;
@@ -21,6 +22,7 @@ public class AstPrinter implements ExpressionVisitor<Void>, CellRefVisitor<Void>
 		this.builder = new StringBuilder();
 		this.location = location;
 
+		builder.append("=");
 		build(ast);
 		return builder.toString();
 	}
@@ -93,7 +95,7 @@ public class AstPrinter implements ExpressionVisitor<Void>, CellRefVisitor<Void>
 				column += location.column();
 			}
 
-			builder.append((ref.lockedColumn() ?  "" : "$") + CellRefParser.numberToColumn(column));
+			builder.append((ref.lockedColumn() ?  "$" : "") + CellLoc.numberToColumn(column));
 		}
 
 		if (!ref.hasUnboundedRow()) {
@@ -102,7 +104,7 @@ public class AstPrinter implements ExpressionVisitor<Void>, CellRefVisitor<Void>
 				row += location.row();
 			}
 
-			builder.append((ref.lockedRow() ?  "" : "$") + Integer.toString(row));
+			builder.append((ref.lockedRow() ?  "$" : "") + Integer.toString(row));
 		}
 		
 		return null;
@@ -111,6 +113,7 @@ public class AstPrinter implements ExpressionVisitor<Void>, CellRefVisitor<Void>
 	@Override
 	public Void visitRangeRef(RangeRef ref) {
 		visitSingleCellRef(ref.left());
+		builder.append(":");
 		visitSingleCellRef(ref.right());
 		
 		return null;

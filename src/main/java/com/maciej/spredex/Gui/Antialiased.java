@@ -4,6 +4,7 @@ import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.RenderingHints;
 
+import javax.swing.JLabel;
 import javax.swing.JTable;
 import javax.swing.JTextField;
 import javax.swing.table.JTableHeader;
@@ -15,6 +16,18 @@ public class Antialiased {
 	public static class Table extends JTable {
 		public Table(TableModel model) {
 			super(model);
+		}
+
+		@Override
+		protected void paintComponent(Graphics graphics) {
+			antialiasGraphics(graphics);
+			super.paintComponent(graphics);
+		}
+	}
+
+	public static class Label extends JLabel {
+		public Label(String text) {
+			super(text);
 		}
 
 		@Override

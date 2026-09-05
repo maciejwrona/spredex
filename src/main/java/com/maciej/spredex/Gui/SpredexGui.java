@@ -55,14 +55,15 @@ public class SpredexGui extends JFrame {
 			column.setPreferredWidth(columnWidth);
 		}
 
+		// Font
+		table.setFont(bigFont);
+		table.getTableHeader().setFont(bigFont);
+
 		// Enable selection
 		table.setRowSelectionAllowed(false);
 		table.setCellSelectionEnabled(true);
 		table.setSelectionMode(ListSelectionModel.SINGLE_INTERVAL_SELECTION);
-
-		// Font
-		table.setFont(bigFont);
-		table.getTableHeader().setFont(bigFont);
+		table.addMouseListener(new CellFiller(table, sheet));
 
 		return table;
 	}

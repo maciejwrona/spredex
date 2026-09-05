@@ -22,11 +22,11 @@ public class SingleCellRef extends CellRef {
 	}
 
 	public boolean hasUnboundedColumn() {
-		return row == unbounded();
+		return column == unbounded();
 	}
 
 	public boolean hasUnboundedRow() {
-		return column == unbounded();
+		return row == unbounded();
 	}
 
 	@Override
@@ -50,10 +50,9 @@ public class SingleCellRef extends CellRef {
 	}
 
 	public CellLoc toLoc(CellLoc currentLocation) {
-		int locRow = 
-			lockedRow ? row : row + currentLocation.row();
-		int locColumn = 
-			lockedColumn ? column : column + currentLocation.column();
+		int locRow = lockedRow ? row : (row + currentLocation.row());
+		int locColumn = lockedColumn ? column : (column + currentLocation.column());
+
 		return new CellLoc(locRow, locColumn);
 	}
 }

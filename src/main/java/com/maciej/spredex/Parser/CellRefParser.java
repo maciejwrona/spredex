@@ -26,7 +26,7 @@ public class CellRefParser {
 		while (Character.isLetter(peek())) {
 			nextChar();
 		}
-		int column = getColumnNumber(textRef.substring(columnStart, current));
+		int column = columnToNumber(textRef.substring(columnStart, current));
 
 		boolean lockedRow = false;
 		// if no column provided, then the $ belongs to the row
@@ -41,7 +41,7 @@ public class CellRefParser {
 		while (Character.isDigit(peek())) {
 			nextChar();
 		}
-		int row = getRowNumber(textRef.substring(rowStart, current));
+		int row = rowToNumber(textRef.substring(rowStart, current));
 
 		// Invalid reference
 		if (!isAtEnd() ||
@@ -100,18 +100,7 @@ public class CellRefParser {
 		return true;
 	}
 
-	public static String numberToColumn(int number) {
-		String result = "";
-
-		while (number > 0) {
-			result = Character.toString((number - 1) % numberOfChars + 'A') + result;
-			number = (number - 1) / numberOfChars;
-		}
-
-		return result;
-	}
-
-	private int getColumnNumber(String column) {
+	public static int columnToNumber(String column) {
 		int result = 0;
 
 		for (int i = column.length() - 1; i >= 0; i--) {
@@ -123,7 +112,7 @@ public class CellRefParser {
 		return result;
 	}
 
-	private int getRowNumber(String row) {
+	public static int rowToNumber(String row) {
 		if (row.equals("")) return 0;
 		return Integer.parseInt(row);
 	}
