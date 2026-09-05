@@ -99,6 +99,10 @@ public class CellRefParser {
 		return true;
 	}
 
+	public static String numberToColumn(int number) {
+		return "TODO";
+	}
+
 	private int getColumnNumber(String column) {
 		int result = 0;
 

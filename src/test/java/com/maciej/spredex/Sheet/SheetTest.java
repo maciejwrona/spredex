@@ -7,8 +7,10 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.DisplayName;
@@ -190,6 +192,110 @@ class SheetTest {
 			else if (cell != null) {
 				assertTrue(sheet.isErrorAt(cell));
 			}
+		}
+	}
+
+	@Nested
+	@DisplayName("Test swiping")
+	class SwipeTests {
+		@Test
+		@DisplayName("Should correctly perform basic swipe")
+		void testBasicSwipe() {
+			Set<CellLoc> toFill = Set.of(
+					new CellLoc(2, 1), new CellLoc(3, 1), new CellLoc(4, 1));
+			sheet.setCell(cells.get(1), "hello!");
+			sheet.swipeCellToFillList(cells.get(1), toFill);
+
+			assertEquals("hello!", sheet.valueAt(cells.get(1)));
+			for (CellLoc cell : toFill) {
+				assertEquals("hello!", sheet.valueAt(cell));
+				assertFalse(sheet.isErrorAt(cell));
+			}
+		}
+
+		@Test
+		@DisplayName("Should perform reference swipe") 
+		void testReferenceSwipe() {
+			CellLoc start = new CellLoc(1, 2);
+			sheet.setCell(start, "=A1");
+			Set<CellLoc> toFill = new HashSet<>();
+
+			for (int i = 2; i <= 5; i++) {
+				sheet.setCell(new CellLoc(i, 1), Integer.toString(i));
+				toFill.add(new CellLoc(i, 2));
+			}
+
+			sheet.swipeCellToFillList(start, toFill);
+
+			for (CellLoc filled : toFill) {
+				assertEquals((double)filled.row(), sheet.valueAt(filled));
+				assertFalse(sheet.isErrorAt(filled));
+			}
+		}
+
+		@Test
+		@DisplayName("Should perform a swipe with locked references")
+		void testLockedReferenceSwipe() {
+			sheet.setCell(new CellLoc(1, 2), "=A$1");
+			sheet.setCell(new CellLoc(1, 1), "A1");
+			sheet.swipeCellToFillList(new CellLoc(1, 2), Set.of(cells.get(2)));
+
+			assertEquals("A1", sheet.valueAt(cells.get(2)));
+			assertFalse(sheet.isErrorAt(cells.get(2)));
+		}
+
+		@Test
+		@DisplayName("Should propagate errors on swipe")
+		void testErrorSwipe() {
+			sheet.setCell(cells.get(1), "=E1 +");
+			assertTrue(sheet.isErrorAt(cells.get(1)));
+
+			sheet.swipeCellToFillList(cells.get(1), Set.of(cells.get(2)));
+			assertTrue(sheet.isErrorAt(cells.get(2)));
+		}
+
+		@Test
+		@DisplayName("Should update cycles on swipe")
+		void testCycleSwipe() {
+			List<CellLoc> column = new ArrayList<>();
+			column.add(null);
+			for (int i = 1; i <= 5; i++) {
+				column.add(new CellLoc(i, 2));
+			}
+
+			// Set A2
+			sheet.setCell(new CellLoc(2, 1), "=B2");
+
+			sheet.setCell(column.get(1), "=$A1");
+
+			// Create cycle
+			sheet.setCell(column.get(4), "=B5");
+			sheet.setCell(column.get(5), "=B4");
+			sheet.setCell(column.get(3), "=B4");
+			assertTrue(sheet.isErrorAt(column.get(4)));
+			assertTrue(sheet.isErrorAt(column.get(5)));
+			assertTrue(sheet.isErrorAt(column.get(3)));
+
+			// Should remove the previous cycle and create one at B2
+			sheet.swipeCellToFillList(column.get(1), Set.of(
+						column.get(2), column.get(3), column.get(4), column.get(5)));
+
+			assertFalse(sheet.isErrorAt(column.get(1)));
+			assertTrue(sheet.isErrorAt(column.get(2)));
+			assertFalse(sheet.isErrorAt(column.get(3)));
+			assertFalse(sheet.isErrorAt(column.get(4)));
+			assertFalse(sheet.isErrorAt(column.get(5)));
+		}
+
+		@Test
+		@DisplayName("Should swipe empty cell")
+		void testSwipeEmptyCell() {
+			sheet.setCell(cells.get(2), "Hello!");
+			sheet.swipeCellToFillList(cells.get(1), Set.of(cells.get(2), cells.get(3)));
+
+			assertEquals(new EmptyCell(), sheet.valueAt(cells.get(1)));
+			assertEquals(new EmptyCell(), sheet.valueAt(cells.get(2)));
+			assertEquals(new EmptyCell(), sheet.valueAt(cells.get(3)));
 		}
 	}
 }

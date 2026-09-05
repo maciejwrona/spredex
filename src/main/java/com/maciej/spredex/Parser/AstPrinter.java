@@ -8,76 +8,111 @@ import com.maciej.spredex.Parser.Expressions.Expression.Reference;
 import com.maciej.spredex.Parser.Expressions.Expression.Unary;
 import com.maciej.spredex.Parser.Expressions.ExpressionVisitor;
 import com.maciej.spredex.CellLoc;
-import com.maciej.spredex.CellRef.CellRef;
 import com.maciej.spredex.CellRef.CellRefVisitor;
 import com.maciej.spredex.CellRef.SingleCellRef;
 import com.maciej.spredex.CellRef.RangeRef;
 import com.maciej.spredex.Parser.Expressions.Expression;
 
-public class AstPrinter implements ExpressionVisitor<String>, CellRefVisitor<String> {
+public class AstPrinter implements ExpressionVisitor<Void>, CellRefVisitor<Void> {
+	private StringBuilder builder;
 	private CellLoc location;
 
 	public String convert(Expression ast, CellLoc location) {
+		this.builder = new StringBuilder();
 		this.location = location;
-		return getString(ast);
+
+		build(ast);
+		return builder.toString();
 	}
 
-	private String getString(Expression expression) {
-		return expression.accept(this);
-	}
-
-	@Override
-	public String visitBinaryExpression(Binary expression) {
-		return getString(expression.left()) + " " +
-			   expression.operator().lexeme() + " " +
-			   getString(expression.right());
+	private void build(Expression expression) {
+		expression.accept(this);
 	}
 
 	@Override
-	public String visitUnaryExpression(Unary expression) {
-		return expression.operator().lexeme() + " " +
-			   getString(expression.right());
+	public Void visitBinaryExpression(Binary expression) {
+		build(expression.left());
+		builder.append(" " + expression.operator().lexeme() + " ");
+		build(expression.right());
+		
+		return null;
 	}
 
 	@Override
-	public String visitGroupingExpression(Grouping expression) {
-		return "( " + getString(expression.expression()) + " )";
+	public Void visitUnaryExpression(Unary expression) {
+		builder.append(expression.operator().lexeme());
+		build(expression.right());
+		
+		return null;
 	}
 
 	@Override
-	public String visitCallExpression(Call expression) {
-		String result = expression.identifier().lexeme() + "(";
+	public Void visitGroupingExpression(Grouping expression) {
+		builder.append("(");
+		build(expression.expression());
+		builder.append(")");
+
+		return null;
+	}
+
+	@Override
+	public Void visitCallExpression(Call expression) {
+		builder.append(expression.identifier().lexeme() + "(");
+
 		for (int i = 0; i < expression.arguments().size(); i++) {
-			result = result + getString(expression.arguments().get(i));
+			build(expression.arguments().get(i));
+
 			if (i != expression.arguments().size() - 1) {
-				result = result + ", ";
+				builder.append(", ");
 			}
 		}
-		return result + ")";
+		builder.append(")");
+
+		return null;
 	}
 
 	@Override
-	public String visitLiteralExpression(Literal expression) {
-		return expression.literal().toString();
-	}
+	public Void visitLiteralExpression(Literal expression) {
+		builder.append(expression.literal().toString());
 
-	private String refToString(CellRef ref) {
-		return ref.accept(this);
-	}
-
-	@Override
-	public String visitReferenceExpression(Reference expression) {
-		return expression.reference().accept(this);
+		return null;
 	}
 
 	@Override
-	public String visitSingleCellRef(SingleCellRef ref) {
-		return (ref.lockedColumn() ? "$" : "") + ref.column() + "c" +
-			   (ref.lockedRow() ? "$" : "") + ref.row() + "r";
+	public Void visitReferenceExpression(Reference expression) {
+		expression.reference().accept(this);
+
+		return null;
 	}
 
 	@Override
-	public String visitRangeRef(RangeRef ref) {
-		return refToString(ref.left()) + ":" + refToString(ref.right());
+	public Void visitSingleCellRef(SingleCellRef ref) {
+		if (!ref.hasUnboundedColumn()) {
+			int column = ref.column();
+			if (!ref.lockedColumn()) {
+				column += location.column();
+			}
+
+			builder.append((ref.lockedColumn() ?  "" : "$") + CellRefParser.numberToColumn(column));
+		}
+
+		if (!ref.hasUnboundedRow()) {
+			int row = ref.row();
+			if (!ref.lockedRow()) {
+				row += location.row();
+			}
+
+			builder.append((ref.lockedRow() ?  "" : "$") + Integer.toString(row));
+		}
+		
+		return null;
+	}
+
+	@Override
+	public Void visitRangeRef(RangeRef ref) {
+		visitSingleCellRef(ref.left());
+		visitSingleCellRef(ref.right());
+		
+		return null;
 	}
 }

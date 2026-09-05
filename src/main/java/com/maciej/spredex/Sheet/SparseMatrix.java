@@ -28,6 +28,10 @@ public class SparseMatrix {
 			.put(row, new Cell(row, column));
 	}
 
+	public void setCell(int row, int column, Cell cell) {
+		columns.computeIfAbsent(column, (k) -> new HashMap<>()).put(row, cell);
+	}
+
 	public void deleteCell(int row, int column) {
 		if (!columns.containsKey(column)) {
 			return;

@@ -44,6 +44,7 @@ public class Sheet extends AbstractTableModel {
 
 	public void loadTable(List<List<String>> table) {
 		Map<CellLoc, String> formulas = new HashMap<>();
+
 		for (int i = 0; i < table.size(); i++) {
 			List<String> row = table.get(i);
 			for (int j = 0; j < row.size(); j++) {
@@ -91,12 +92,34 @@ public class Sheet extends AbstractTableModel {
 
 				ParseResult parseResult = parseFormulaAt(location);
 				cell.setAst(parseResult.ast());
+				cell.setRequiredRefs(parseResult.requires());
 				required.put(location, toCoordinates(location, parseResult.requires()));
 			}
 		}
 
 		graph.setRequiredForMultipleCells(required);
 		updateAll(formulas.keySet());
+	}
+
+	public void swipeCellToFillList(CellLoc from, Set<CellLoc> toFill) {
+		Map<CellLoc, Collection<CellCoordinates>> required = new HashMap<>();
+		Cell cell = cellAt(from);
+
+		for (CellLoc location : toFill) {
+			if (isCellEmpty(from)) {
+				cells.deleteCell(location.row(), location.column());
+				required.put(location, new ArrayList<>());
+			}
+			// Copy the cell
+			else {
+				cells.setCell(location.row(), location.column(), 
+							  new Cell(location.row(), location.column(), cell));
+				required.put(location, toCoordinates(location, cell.requiredRefs()));
+			}
+		}
+		
+		graph.setRequiredForMultipleCells(required);
+		updateAll(toFill);
 	}
 
 	private ParseResult parseFormulaAt(CellLoc location) {
