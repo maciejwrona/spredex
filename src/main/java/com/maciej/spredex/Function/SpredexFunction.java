@@ -3,6 +3,7 @@ package com.maciej.spredex.Function;
 import java.util.List;
 
 import com.maciej.spredex.CellLoc;
+import com.maciej.spredex.Interpreter.Interpreter;
 import com.maciej.spredex.Sheet.Sheet;
 
 public abstract class SpredexFunction {
@@ -17,5 +18,6 @@ public abstract class SpredexFunction {
 	public String name() { return name; }
 	public Arity arity() { return arity; }
 
-	public abstract Object call(List<Object> arguments, CellLoc location, Sheet sheet);
+	public abstract Object call(
+			List<Object> arguments, CellLoc location, Sheet sheet, Interpreter interpreter);
 }

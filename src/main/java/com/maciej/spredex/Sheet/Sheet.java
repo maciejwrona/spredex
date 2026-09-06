@@ -15,9 +15,7 @@ import com.maciej.spredex.Parser.Lexer.Lexer;
 import com.maciej.spredex.Parser.Lexer.Token;
 import com.maciej.spredex.Sheet.DependencyGraph.DependencyGraph;
 import com.maciej.spredex.Function.SpredexFunction;
-import com.maciej.spredex.Function.Models.Average;
-import com.maciej.spredex.Function.Models.If;
-import com.maciej.spredex.Function.Models.Sum;
+import com.maciej.spredex.Function.Models.*;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -35,6 +33,7 @@ public class Sheet extends AbstractTableModel {
 	private final DependencyGraph graph;
 	private final int maxRows;
 	private final int maxColumns;
+	private final EmptyCell emptyCell = new EmptyCell();
 
 	public Sheet(int maxRows, int maxColumns) {
 		initializeFunctions();
@@ -62,11 +61,15 @@ public class Sheet extends AbstractTableModel {
 		functions.put("SUM", new Sum());
 		functions.put("AVERAGE", new Average());
 		functions.put("IF", new If());
+		functions.put("VLOOKUP", new Vlookup());
+		functions.put("AND", new And());
+		functions.put("OR", new Or());
+		functions.put("NOT", new Not());
 	}
 
 	public Object valueAt(CellLoc location) {
 		if (isCellEmpty(location)) {
-			return new EmptyCell();
+			return emptyCell();
 		}
 
 		return cellAt(location).value();
@@ -191,7 +194,7 @@ public class Sheet extends AbstractTableModel {
 		}
 
 		if (graph.isInCycle(location)) {
-			setErrorAt(location, "#CYCLE", "Cilcular cell reference detected.");
+			setErrorAt(location, ErrorType.CYCLE, "Cilcular cell reference detected.");
 			return;
 		}
 
@@ -210,7 +213,7 @@ public class Sheet extends AbstractTableModel {
 
 	private void setValueAt(Cell cell, Object value) {
 		Object realValue = switch (value) {
-			case CellLoc loc -> valueAt(loc);
+			case CellLoc loc -> (isCellEmpty(loc) ? "" : valueAt(loc));
 			case CellRange range -> throw new CellError(ErrorType.TYPE, "Invalid type at cell.");
 			default -> value;
 		};
@@ -229,17 +232,16 @@ public class Sheet extends AbstractTableModel {
 		return cells.get(location.row(), location.column());
 	}
 
-	private boolean isCellEmpty(CellLoc location) {
+	public boolean isCellEmpty(CellLoc location) {
 		return cellAt(location) == null;
 	}
 
 	private void setErrorAt(CellLoc target, CellError error) {
-		String errorValue = "#" + error.getType().toString();
 		System.out.println(error.getMessage());
-		setErrorAt(target, errorValue, error.getMessage());
+		setErrorAt(target, error.getType(), error.getMessage());
 	}
 
-	private void setErrorAt(CellLoc target, String errorValue, String errorMessage) {
+	private void setErrorAt(CellLoc target, ErrorType errorValue, String errorMessage) {
 		Cell cell = cellAt(target);
 
 		cell.setValue(errorValue);
@@ -305,4 +307,6 @@ public class Sheet extends AbstractTableModel {
 	public boolean isCellEditable(int rowIndex, int columnIndex) {
 		return true;
 	}
+
+	public EmptyCell emptyCell() { return emptyCell; }
 }

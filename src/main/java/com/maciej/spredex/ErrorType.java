@@ -7,4 +7,10 @@ public enum ErrorType {
 	PARSE,
 	TYPE,
 	DIV,
+	NOTFOUND;
+
+	@Override
+	public String toString() {
+		return "#" + name();
+	}
 }

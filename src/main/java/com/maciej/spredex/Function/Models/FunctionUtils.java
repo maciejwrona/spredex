@@ -1,13 +1,9 @@
-package com.maciej.spredex.Function;
-
-import javax.swing.SwingConstants;
+package com.maciej.spredex.Function.Models;
 
 import com.maciej.spredex.CellError;
 import com.maciej.spredex.CellLoc;
 import com.maciej.spredex.CellRange;
 import com.maciej.spredex.ErrorType;
-import com.maciej.spredex.CellRef.RangeRef;
-import com.maciej.spredex.Sheet.EmptyCell;
 import com.maciej.spredex.Sheet.Sheet;
 
 public class FunctionUtils {
@@ -41,7 +37,7 @@ public class FunctionUtils {
 	
 	public static int countNotEmpty(Object arg, CellLoc location, Sheet sheet) {
 		return switch (arg) {
-			case CellLoc loc -> (isCellEmpty(loc, sheet) ? 0 : 1);
+			case CellLoc loc -> (sheet.isCellEmpty(loc) ? 0 : 1);
 			case CellRange range -> sheet.cellsInRange(range).size();
 			default -> 1;
 		};
@@ -49,21 +45,41 @@ public class FunctionUtils {
 
 	public static boolean isTrue(Object argument, Sheet sheet) {
 		return switch (argument) {
-			case Boolean b -> b;
-			case CellLoc loc -> locToBoolean(loc, sheet);
-			default -> throw argumentTypeError(argument);
+			case CellLoc loc -> isLocTrue(loc, sheet);
+			default -> isValueTrue(argument);
 		};
 	}
 
-	private static boolean locToBoolean(CellLoc loc, Sheet sheet) {
-		return switch (sheet.valueAt(loc)) {
+	private static boolean isLocTrue(CellLoc loc, Sheet sheet) {
+		return (!sheet.isCellEmpty(loc) && isValueTrue(sheet.valueAt(loc)));
+	}
+
+	private static boolean isValueTrue(Object value) {
+		return switch (value) {
 			case Boolean b -> b;
-			default -> throw argumentTypeError(sheet.valueAt(loc));
+			case Double d -> d != 0;
+			case String s -> !s.isBlank();
+			default -> throw argumentTypeError(value);
 		};
+	}
+
+	public static CellRange firstColumn(CellRange range) {
+		return new CellRange(
+				new CellLoc(range.left().row(), range.left().column()), 
+				new CellLoc(range.right().row(), range.left().column())
+				);
 	}
 
 	public static CellError typeError(String message) {
 		return new CellError(ErrorType.TYPE, message);
+	}
+
+	public static CellError notFound(Object value) {
+		return new CellError(ErrorType.NOTFOUND, "Did not find value " + value + ".");
+	}
+
+	public static CellError outOfBoundsRange() {
+		return new CellError(ErrorType.IDENTIFIER, "Out of bounds range.");
 	}
 
 	public static CellError argumentTypeError(Object argument) {
@@ -79,7 +95,17 @@ public class FunctionUtils {
 		return new CellError(ErrorType.DIV, "Attempt to divide by zero.");
 	}
 
-	private static boolean isCellEmpty(CellLoc cell, Sheet sheet) {
-		return sheet.valueAt(cell) == new EmptyCell();
+	public static CellRange getRangeArgument(Object argument) {
+		return switch (argument) {
+			case CellRange range -> range;
+			default -> throw argumentTypeError(argument);
+		};
+	}
+
+	public static int getIntArgument(Object argument) {
+		return switch (argument) {
+			case Integer i -> i;
+			default -> throw argumentTypeError(argument);
+		};
 	}
 }

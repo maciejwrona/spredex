@@ -8,26 +8,20 @@ import com.maciej.spredex.Function.SpredexFunction;
 import com.maciej.spredex.Interpreter.Interpreter;
 import com.maciej.spredex.Sheet.Sheet;
 
-public class Average extends SpredexFunction {
-	public Average() {
-		super("Average", new Arity.Minimum(1));
+public class And extends SpredexFunction {
+	public And() {
+		super("AND", new Arity.Minimum(2));
 	}
 
 	@Override
 	public Object call(
 			List<Object> arguments, CellLoc location, Sheet sheet, Interpreter interpreter) {
-		double sum = 0;
-		int numberOfRecords = 0;
-
 		for (Object arg : arguments) {
-			sum += FunctionUtils.getSum(arg, location, sheet);
-			numberOfRecords += FunctionUtils.countNotEmpty(arg, location, sheet);
+			if (!FunctionUtils.isTrue(arg, sheet)) {
+				return false;
+			}
 		}
-
-		if (numberOfRecords == 0) {
-			throw FunctionUtils.divisionByZero();
-		}
-
-		return sum / numberOfRecords;
+		
+		return true;
 	}
 }

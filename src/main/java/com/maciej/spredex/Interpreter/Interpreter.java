@@ -132,7 +132,7 @@ public class Interpreter implements ExpressionVisitor<Object> {
 					"Expected " + function.arity() + " arguments for function " + expression.identifier().lexeme() + ".");
 		}
 		
-		return function.call(arguments, location, sheet);
+		return function.call(arguments, location, sheet, this);
 	}
 
 	@Override
@@ -154,7 +154,7 @@ public class Interpreter implements ExpressionVisitor<Object> {
 		};
 	}
 
-	private boolean equal(Object left, Object right) {
+	public boolean equal(Object left, Object right) {
 		if (isNumberValue(left) && isNumberValue(right)) {
 			return doubleEqual(castToDouble(left), castToDouble(right));
 		}
@@ -181,7 +181,7 @@ public class Interpreter implements ExpressionVisitor<Object> {
 		return switch (value) {
 			case Double d -> true;
 			case CellLoc loc -> 
-				(sheet.valueAt(loc) == new EmptyCell() || sheet.valueAt(loc) instanceof Double);
+				(sheet.isCellEmpty(loc) || sheet.valueAt(loc) instanceof Double);
 			default -> false;
 		};
 	}

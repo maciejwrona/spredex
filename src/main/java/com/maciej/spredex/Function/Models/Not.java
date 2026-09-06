@@ -8,15 +8,14 @@ import com.maciej.spredex.Function.SpredexFunction;
 import com.maciej.spredex.Interpreter.Interpreter;
 import com.maciej.spredex.Sheet.Sheet;
 
-public class If extends SpredexFunction {
-	public If() {
-		super("IF", new Arity.Fixed(3));
+public class Not extends SpredexFunction {
+	public Not() {
+		super("NOT", new Arity.Fixed(1));
 	}
 
 	@Override
 	public Object call(
 			List<Object> arguments, CellLoc location, Sheet sheet, Interpreter interpreter) {
-		return (FunctionUtils.isTrue(arguments.get(0), sheet) ?
-				arguments.get(1) : arguments.get(2));
+		return FunctionUtils.isTrue(arguments.get(0), sheet);
 	}
 }

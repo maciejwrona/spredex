@@ -4,8 +4,8 @@ import java.util.List;
 
 import com.maciej.spredex.CellLoc;
 import com.maciej.spredex.Function.Arity;
-import com.maciej.spredex.Function.FunctionUtils;
 import com.maciej.spredex.Function.SpredexFunction;
+import com.maciej.spredex.Interpreter.Interpreter;
 import com.maciej.spredex.Sheet.Sheet;
 
 public class Sum extends SpredexFunction {
@@ -15,12 +15,11 @@ public class Sum extends SpredexFunction {
 
 	@Override
 	public Object call(
-			List<Object> arguments, CellLoc location, Sheet sheet) {
+			List<Object> arguments, CellLoc location, Sheet sheet, Interpreter interpreter) {
 		double result = 0;
 		for (Object arg : arguments) {
 			result += FunctionUtils.getSum(arg, location, sheet);
 		}
 		return result;
 	}
-
 }
