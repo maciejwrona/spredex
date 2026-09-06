@@ -130,9 +130,9 @@ public class Lexer {
 		while (isPartOfIdentifier(peek())) nextChar();
 
 		String lexeme = formula.substring(start, current);
-		switch (lexeme) {
-			case "FALSE": addToken(TokenType.BOOLEAN, false); return;
-			case "TRUE": addToken(TokenType.BOOLEAN, true); return;
+		switch (lexeme.toLowerCase()) {
+			case "false": addToken(TokenType.BOOLEAN, false); return;
+			case "true": addToken(TokenType.BOOLEAN, true); return;
 			default:
 				addToken(TokenType.IDENTIFIER);
 		}

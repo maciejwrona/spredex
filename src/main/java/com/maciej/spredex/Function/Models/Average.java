@@ -20,7 +20,7 @@ public class Average extends SpredexFunction {
 
 		for (Object arg : arguments) {
 			sum += FunctionUtils.getSum(arg, location, sheet);
-			numberOfRecords += FunctionUtils.getNumberOfRecordsInArgument(arg, location, sheet);
+			numberOfRecords += FunctionUtils.countNotEmpty(arg, location, sheet);
 		}
 
 		if (numberOfRecords == 0) {

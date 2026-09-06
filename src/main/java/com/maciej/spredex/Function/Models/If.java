@@ -15,7 +15,7 @@ public class If extends SpredexFunction {
 
 	@Override
 	public Object call(List<Object> arguments, CellLoc location, Sheet sheet) {
-		return (FunctionUtils.isTrue(arguments.get(0)) ?
+		return (FunctionUtils.isTrue(arguments.get(0), sheet) ?
 				arguments.get(1) : arguments.get(2));
 	}
 }

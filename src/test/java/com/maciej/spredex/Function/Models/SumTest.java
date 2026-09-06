@@ -1,4 +1,4 @@
-package com.maciej.spredex.Function;
+package com.maciej.spredex.Function.Models;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -12,8 +12,7 @@ import org.junit.jupiter.api.Test;
 
 import com.maciej.spredex.CellError;
 import com.maciej.spredex.CellLoc;
-import com.maciej.spredex.CellRef.SingleCellRef;
-import com.maciej.spredex.CellRef.RangeRef;
+import com.maciej.spredex.CellRange;
 import com.maciej.spredex.Sheet.Sheet;
 
 class SumTest {
@@ -46,8 +45,8 @@ class SumTest {
 
 		assertEquals(3.0, 
 				new Sum().call(
-					List.of(new RangeRef(new SingleCellRef(1, 1, true, true),
-										 new SingleCellRef(3, 3, true, true)),
+					List.of(new CellRange(new CellLoc(1, 1),
+										  new CellLoc(3, 3)),
 							4.0),
 					cells.get(1),
 					sheet)

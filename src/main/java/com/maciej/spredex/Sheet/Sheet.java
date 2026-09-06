@@ -4,6 +4,7 @@ import com.maciej.spredex.CellCoordinates;
 import com.maciej.spredex.CellError;
 import com.maciej.spredex.CellLoc;
 import com.maciej.spredex.CellRange;
+import com.maciej.spredex.ErrorType;
 import com.maciej.spredex.CellRef.CellRef;
 import com.maciej.spredex.Interpreter.Interpreter;
 import com.maciej.spredex.Parser.FormulaParser;
@@ -15,6 +16,7 @@ import com.maciej.spredex.Parser.Lexer.Token;
 import com.maciej.spredex.Sheet.DependencyGraph.DependencyGraph;
 import com.maciej.spredex.Function.SpredexFunction;
 import com.maciej.spredex.Function.Models.Average;
+import com.maciej.spredex.Function.Models.If;
 import com.maciej.spredex.Function.Models.Sum;
 
 import java.util.ArrayList;
@@ -59,6 +61,7 @@ public class Sheet extends AbstractTableModel {
 	private void initializeFunctions() {
 		functions.put("SUM", new Sum());
 		functions.put("AVERAGE", new Average());
+		functions.put("IF", new If());
 	}
 
 	public Object valueAt(CellLoc location) {
@@ -67,6 +70,15 @@ public class Sheet extends AbstractTableModel {
 		}
 
 		return cellAt(location).value();
+	}
+
+	public Double numberValueAt(CellLoc location) {
+		if (isCellEmpty(location)) {
+			return 0.0;
+		}
+
+		Object value = valueAt(location);
+		return ((value instanceof Double) ? (Double)value : null);
 	}
 
 	public void setCell(CellLoc location, String formula) {
@@ -185,7 +197,7 @@ public class Sheet extends AbstractTableModel {
 
 		try {
 			Object value = interpreter.interpret(cell.ast(), location);
-			cell.setValue(value);
+			setValueAt(cell, value);
 			cell.setError(false);
 		}
 		catch (CellError error) {
@@ -194,6 +206,15 @@ public class Sheet extends AbstractTableModel {
 		}
 
 		fireCellUpdate(location);
+	}
+
+	private void setValueAt(Cell cell, Object value) {
+		Object realValue = switch (value) {
+			case CellLoc loc -> valueAt(loc);
+			case CellRange range -> throw new CellError(ErrorType.TYPE, "Invalid type at cell.");
+			default -> value;
+		};
+		cell.setValue(realValue);
 	}
 
 	public boolean isErrorAt(int row, int column) {

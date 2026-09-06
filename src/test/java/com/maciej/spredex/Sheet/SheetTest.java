@@ -186,7 +186,7 @@ class SheetTest {
 		
 		for (CellLoc cell : cells) {
 			if (cell != null && cell != cells.get(5)) {
-				assertEquals(0.0, sheet.valueAt(cell));
+				assertEquals(new EmptyCell(), sheet.valueAt(cell));
 				assertFalse(sheet.isErrorAt(cell));
 			}
 			else if (cell != null) {

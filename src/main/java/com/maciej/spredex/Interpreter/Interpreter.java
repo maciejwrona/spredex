@@ -6,9 +6,7 @@ import java.util.Map;
 
 import com.maciej.spredex.CellError;
 import com.maciej.spredex.CellLoc;
-import com.maciej.spredex.CellRef.CellRefVisitor;
 import com.maciej.spredex.CellRef.RangeRef;
-import com.maciej.spredex.CellRef.SingleCellRef;
 import com.maciej.spredex.ErrorType;
 import com.maciej.spredex.Function.SpredexFunction;
 import com.maciej.spredex.Parser.Expressions.Expression;
@@ -18,7 +16,7 @@ import com.maciej.spredex.Parser.Lexer.Token;
 import com.maciej.spredex.Sheet.EmptyCell;
 import com.maciej.spredex.Sheet.Sheet;
 
-public class Interpreter implements ExpressionVisitor<Object>, CellRefVisitor<Object> {
+public class Interpreter implements ExpressionVisitor<Object> {
 	private final Sheet sheet;
 
 	private final Map<String, SpredexFunction> functions;
@@ -58,19 +56,19 @@ public class Interpreter implements ExpressionVisitor<Object>, CellRefVisitor<Ob
 		switch (expression.operator().type()) {
 			case PLUS:
 				verifyNumberOperands(expression.operator(), left, right);
-				return (Double)left + (Double)right;
+				return castToDouble(left) + castToDouble(right);
 			case MINUS:
 				verifyNumberOperands(expression.operator(), left, right);
-				return (Double)left - (Double)right;
+				return castToDouble(left) - castToDouble(right);
 			case ASTERISK:
 				verifyNumberOperands(expression.operator(), left, right);
-				return (Double)left * (Double)right;
+				return castToDouble(left) * castToDouble(right);
 			case SLASH:
 				verifyNumberOperands(expression.operator(), left, right);
-				return (Double)left / (Double)right;
+				return castToDouble(left) / castToDouble(right);
 			case CARET:
 				verifyNumberOperands(expression.operator(), left, right);
-				return Math.pow((Double)left, (Double)right);
+				return Math.pow(castToDouble(left), castToDouble(right));
 			case AMPERSAND:
 				return left.toString() + right.toString();
 			
@@ -81,16 +79,18 @@ public class Interpreter implements ExpressionVisitor<Object>, CellRefVisitor<Ob
 				return !equal(left, right);
 			case GREATER:
 				verifyNumberOperands(expression.operator(), left, right);
-				return (Double)left > (Double)right;
+				return castToDouble(left) > castToDouble(right);
 			case LESS:
 				verifyNumberOperands(expression.operator(), left, right);
-				return (Double)left < (Double)right;
+				return castToDouble(left) < castToDouble(right);
 			case GREATER_EQUAL:
 				verifyNumberOperands(expression.operator(), left, right);
-				return ((Double)left > (Double)right || doubleEqual((Double)left, (Double)right));
+				return (castToDouble(left) > castToDouble(right) || 
+						doubleEqual(castToDouble(left), castToDouble(right)));
 			case LESS_EQUAL:
 				verifyNumberOperands(expression.operator(), left, right);
-				return ((Double)left < (Double)right || doubleEqual((Double)left, (Double)right));
+				return (castToDouble(left) < castToDouble(right) || 
+						doubleEqual(castToDouble(left), castToDouble(right)));
 		}
 		
 		return null;
@@ -103,7 +103,7 @@ public class Interpreter implements ExpressionVisitor<Object>, CellRefVisitor<Ob
 		switch (expression.operator().type()) {
 			case MINUS:
 				verifyNumberOperands(expression.operator(), right);
-				return -(Double)right;
+				return -castToDouble(right);
 		}
 
 		return null;
@@ -142,30 +142,21 @@ public class Interpreter implements ExpressionVisitor<Object>, CellRefVisitor<Ob
 
 	@Override
 	public Object visitReferenceExpression(Reference expression) {
-		return expression.reference().accept(this);
+		return expression.reference()
+			.toCoordinates(location, sheet.getRowCount(), sheet.getRowCount());
 	}
 
-	@Override
-	public Object visitSingleCellRef(SingleCellRef ref) {
-		CellLoc target = ref.toLoc(location);
-
-		if (sheet.isErrorAt(target)) {
-			throw new CellError(ErrorType.TYPE, 
-					"Cell at " + target + " is not available.");
-		}
-
-		Object value = sheet.valueAt(target);
-		return ((value instanceof EmptyCell) ? 0.0 : value);
-	}
-
-	@Override
-	public Object visitRangeRef(RangeRef ref) {
-		return ref;
+	private double castToDouble(Object value) {
+		return switch (value) {
+			case Double d -> d;
+			case CellLoc loc -> sheet.numberValueAt(loc);
+			default -> throw new CellError(ErrorType.TYPE, "This should not happen!");
+		};
 	}
 
 	private boolean equal(Object left, Object right) {
-		if (left instanceof Double && right instanceof Double) {
-			return doubleEqual((Double)left, (Double)right);
+		if (isNumberValue(left) && isNumberValue(right)) {
+			return doubleEqual(castToDouble(left), castToDouble(right));
 		}
 		else {
 			return left.equals(right);
@@ -179,10 +170,19 @@ public class Interpreter implements ExpressionVisitor<Object>, CellRefVisitor<Ob
 
 	private void verifyNumberOperands(Token operator, Object... operands) {
 		for (Object operand : operands) {
-			if (!(operand instanceof Double)) {
+			if (!isNumberValue(operand)) {
 				throw new CellError(ErrorType.TYPE, 
 						"Expected number operands for operator '" + operator.lexeme() + "'.");
 			}
 		}
+	}
+
+	private boolean isNumberValue(Object value) {
+		return switch (value) {
+			case Double d -> true;
+			case CellLoc loc -> 
+				(sheet.valueAt(loc) == new EmptyCell() || sheet.valueAt(loc) instanceof Double);
+			default -> false;
+		};
 	}
 }
