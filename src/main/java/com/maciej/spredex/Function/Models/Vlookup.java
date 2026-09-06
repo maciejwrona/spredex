@@ -21,7 +21,8 @@ public class Vlookup extends SpredexFunction {
 		CellRange lookupTable = FunctionUtils.getRangeArgument(arguments.get(1));
 		int valueColumn = FunctionUtils.getIntArgument(arguments.get(2));
 
-		if (valueColumn + lookupTable.left().column() > lookupTable.right().column()) {
+		if (valueColumn < 0 || 
+			valueColumn + lookupTable.left().column() > lookupTable.right().column()) {
 			throw FunctionUtils.outOfBoundsRange();
 		}
 

@@ -104,8 +104,16 @@ public class FunctionUtils {
 
 	public static int getIntArgument(Object argument) {
 		return switch (argument) {
-			case Integer i -> i;
+			case Double d -> convertToInt(d);
 			default -> throw argumentTypeError(argument);
 		};
+	}
+
+	private static int convertToInt(Double d) {
+		if (Math.floor(d) == d) {
+			return d.intValue();
+		}
+
+		throw argumentTypeError(d);
 	}
 }
