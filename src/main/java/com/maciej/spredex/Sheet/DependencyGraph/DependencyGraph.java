@@ -172,7 +172,7 @@ public class DependencyGraph {
 		}
 
 		// Found scc
-		if (low.get(start) == cellId.get(start)) {
+		if (low.get(start).equals(cellId.get(start))) {
 			Set<CellLoc> scc = new HashSet<>();
 			while (true) {
 				CellLoc node = stack.pop();

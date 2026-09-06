@@ -4,4 +4,5 @@ target/
 .settings/
 next.txt
 guiNext.txt
+loggingFunction.txt
 

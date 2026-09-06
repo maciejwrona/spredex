@@ -65,6 +65,7 @@ public class Sheet extends AbstractTableModel {
 		functions.put("AND", new And());
 		functions.put("OR", new Or());
 		functions.put("NOT", new Not());
+		functions.put("COUNT", new Count());
 	}
 
 	public Object valueAt(CellLoc location) {
@@ -194,7 +195,7 @@ public class Sheet extends AbstractTableModel {
 		}
 
 		if (graph.isInCycle(location)) {
-			setErrorAt(location, ErrorType.CYCLE, "Cilcular cell reference detected.");
+			setErrorAt(location, ErrorType.CYCLE, "Circular cell reference detected.");
 			return;
 		}
 
@@ -237,7 +238,6 @@ public class Sheet extends AbstractTableModel {
 	}
 
 	private void setErrorAt(CellLoc target, CellError error) {
-		System.out.println(error.getMessage());
 		setErrorAt(target, error.getType(), error.getMessage());
 	}
 

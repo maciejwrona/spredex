@@ -13,12 +13,14 @@ import org.junit.jupiter.api.Test;
 import com.maciej.spredex.CellError;
 import com.maciej.spredex.CellLoc;
 import com.maciej.spredex.CellRange;
+import com.maciej.spredex.Interpreter.Interpreter;
 import com.maciej.spredex.Sheet.Sheet;
 
 class SumTest {
 	private final int maxRows = 10000;
 	private final int maxColumns = 10000;
 	private final Sheet sheet = new Sheet(maxRows, maxColumns);
+	private final Interpreter interpreter = new Interpreter(sheet, null);
 
 	private static final List<CellLoc> cells = new ArrayList<>();
 
@@ -34,7 +36,7 @@ class SumTest {
 	@DisplayName("Should add numbers correctly")
 	void testNumbers() {
 		assertEquals(42.0, 
-				new Sum().call(List.of(28.0, 21.0, -7.0), cells.get(1), sheet));
+				new Sum().call(List.of(28.0, 21.0, -7.0), cells.get(1), sheet, interpreter));
 	}
 
 	@Test
@@ -49,13 +51,13 @@ class SumTest {
 										  new CellLoc(3, 3)),
 							4.0),
 					cells.get(1),
-					sheet)
+					sheet, interpreter)
 		);
 	}
 
 	@Test
 	@DisplayName("Should error invalid types")
 	void testTypeError() {
-		assertThrows(CellError.class, () -> new Sum().call(List.of("hello"), cells.get(1), sheet));
+		assertThrows(CellError.class, () -> new Sum().call(List.of("hello"), cells.get(1), sheet, interpreter));
 	}
 }

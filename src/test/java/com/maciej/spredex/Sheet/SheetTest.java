@@ -19,6 +19,7 @@ import org.junit.jupiter.api.Test;
 
 import com.maciej.spredex.CellLoc;
 import com.maciej.spredex.CellRange;
+import com.maciej.spredex.ErrorType;
 
 class SheetTest {
 	private final int maxRows = 100000;
@@ -112,7 +113,7 @@ class SheetTest {
 			assertTrue(sheet.isErrorAt(cells.get(2)));
 			assertTrue(sheet.isErrorAt(cells.get(3)));
 			assertFalse(sheet.isErrorAt(cells.get(5)));
-			assertEquals("#TYPE", sheet.valueAt(cells.get(6)));
+			assertEquals(ErrorType.TYPE, sheet.valueAt(cells.get(6)));
 
 			sheet.setCell(cells.get(4), "hello");
 
@@ -186,7 +187,7 @@ class SheetTest {
 		
 		for (CellLoc cell : cells) {
 			if (cell != null && cell != cells.get(5)) {
-				assertEquals(new EmptyCell(), sheet.valueAt(cell));
+				assertEquals("", sheet.valueAt(cell));
 				assertFalse(sheet.isErrorAt(cell));
 			}
 			else if (cell != null) {

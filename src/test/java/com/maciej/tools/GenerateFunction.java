@@ -60,7 +60,8 @@ public class GenerateFunction {
 
 	private static void defineCallFunction(PrintWriter writer) {
 		writer.println("	@Override");
-		writer.println("	public Object call(List<Object> arguments, CellLoc location, Sheet sheet) {");
+		writer.println("	public Object call(");
+		writer.println("			List<Object> arguments, CellLoc location, Sheet sheet, Interpreter interpreter) {");
 		writer.println();
 		writer.println("	}");
 	}
